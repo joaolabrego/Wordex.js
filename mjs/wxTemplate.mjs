@@ -24,9 +24,32 @@ export default class wxTemplate {
     return this.#toolbar
   }
 
+  isFocused(object) {
+    return object.element.dataset.wdxSelected === true
+  }
+
+  unfocus() {
+    const selected = this.#objects.find(obj => obj.element.dataset.wdxSelected)
+    if (selected)
+      delete selected.element.dataset.wdxSelected
+  }
+
+  focus(object) {
+    const selected = this.#objects.find(obj => obj.element.dataset.wdxSelected)
+    if (selected)
+      delete selected.element.dataset.wdxSelected
+    object.element.dataset.wdxSelected = true
+  }
+
   add(object) {
     if (this.#objects.findIndex(obj => obj === object) === -1)
       this.#objects.push(object)
-    console.log(this.#objects)
+  }
+
+  remove(object) {
+      const index = this.#objects.findIndex(obj => obj === object)
+      if (index > -1)
+        this.#objects.splice(index, 1)
+      selected.remove()
   }
 }

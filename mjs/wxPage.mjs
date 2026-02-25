@@ -22,7 +22,7 @@ export default class wxPage {
 
     constructor(template) {
         this.#template = template
-        this.#page = /** @type {wdxPage} */(document.createElement("div"))
+        this.#page = (document.createElement("div"))
         this.#page.dataset.wdxKind = "page"
 
         let style = document.createElement("style")
@@ -42,31 +42,30 @@ export default class wxPage {
 
         this.#header = new wxSection(this, "header", "Cabeçalho: clique para editar")
         this.#sections.push(this.#header)
-        this.#page.appendChild(this.#header.root)
-        
+        this.#page.appendChild(this.#header.element)
 
         this.#body = new wxSection(this, "body", "Corpo do documento: clique para editar")
         this.#sections.push(this.#body)
-        this.#page.appendChild(this.#body.root)
+        this.#page.appendChild(this.#body.element)
 
         this.#footer = new wxSection(this, "footer", "Rodapé: clique para editar")
         this.#sections.push(this.#footer)
-        this.#page.appendChild(this.#footer.root)
+        this.#page.appendChild(this.#footer.element)
         
-        wxSection.setRoot(this.#body.root)
+        wxSection.setRoot(this.#body.element)
 
         // Registra handlers de clique para parágrafo, tabela e imagem em cada seção editável
         for (const section of [this.#header, this.#body, this.#footer]) {
-            wxParagraph.attach(section.root)
-            wxGrid.attach(section.root)
-            wxPicture.attach(section.root)
+            wxParagraph.attach(section.element)
+            wxGrid.attach(section.element)
+            wxPicture.attach(section.element)
         }
 
         document.addEventListener("selectionchange", () => wxRange.saveSelection())
     }
 
     selectedSection() {
-        const section = this.#sections.find(s => s.isSelected)?.root
+        const section = this.#sections.find(s => s.isSelected)?.element
         if (section)
             return section
     }
@@ -93,15 +92,15 @@ export default class wxPage {
     }
 
     get rootHeader() {
-        return /** { @type { wdxSectionHeader } } */(this.#header.root)
+        return /** { @type { wdxSectionHeader } } */(this.#header.element)
     }
 
     get rootBody() {
-        return /** { @type { wdxSectionBody } } */(this.#body.root)
+        return /** { @type { wdxSectionBody } } */(this.#body.element)
     }
 
     get rootFooter() {
-        return /** { @type { wdxSectionFooter } } */(this.#footer.root)
+        return /** { @type { wdxSectionFooter } } */(this.#footer.element)
     }
 
     get header() {

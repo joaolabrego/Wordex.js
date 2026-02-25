@@ -33,8 +33,16 @@ export default class wxSection {
         this.#section.append(this.#paragraphs[0].element)
     }
 
+    get owner() {
+        return this.#page
+    }
+
+    get element() {
+        return this.#section
+    }
+
     selectedParagraph() {
-        const paragraph = this.#paragraphs.find(p => p.isSelected)?.root
+        const paragraph = this.#paragraphs.find(p => p.isSelected)?.element
         if (paragraph)
             return paragraph
     }
@@ -47,7 +55,7 @@ export default class wxSection {
 
     selectParagraph(id) {
         this.unselectParagraph()
-        const selected = this.#paragraphs.find(p => p.root.id === id)?.root
+        const selected = this.#paragraphs.find(p => p.element.id === id)?.element
         if (selected instanceof HTMLDivElement)
             selected.dataset.wxSelected = "1"
     }
@@ -78,14 +86,6 @@ export default class wxSection {
 
     get isFooter() {
         return this.#section.dataset.wdxKind === "section" && this.#section.dataset.wdxSector === "footer"
-    }
-
-    get owner() {
-        return this.#page
-    }
-
-    get root() {
-        return this.#section
     }
 
     get firstParagraph() {
