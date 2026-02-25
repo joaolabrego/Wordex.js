@@ -20,8 +20,8 @@ export default class wxPage {
     #footer
     #sections = []
 
-    constructor(owner) {
-        this.#template = owner
+    constructor(template) {
+        this.#template = template
         this.#page = /** @type {wdxPage} */(document.createElement("div"))
         this.#page.dataset.wdxKind = "page"
 

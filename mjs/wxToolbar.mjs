@@ -21,11 +21,11 @@ export default class wxToolbar {
     #selectBorderRadius
     #buttonEditMode
     #inputFile
-    #owner
+    #template
     #selectedColor = wxConfig.K_DEFAULT_COLOR
 
-    constructor(owner) {
-        this.#owner = owner
+    constructor(template) {
+        this.#template = template
         this.#toolbar = document.createElement("div")
 
         const style = document.createElement("style")
@@ -34,64 +34,41 @@ export default class wxToolbar {
 
         this.#toolbar.classList.add("toolbar")
 
-        this.#toolbar.appendChild(
-            this.#selectFontFamily = this.#createSelect(wxConfig.fontFamilyList,"Selecionar família da fonte", () => this.#setFontFamily())
-        )
-
+        // família da fonte
+        this.#toolbar.appendChild(this.#selectFontFamily = this.#createSelect(wxConfig.fontFamilyList,"Selecionar família da fonte", () => this.#setFontFamily()))
         // tamanho -> wxPage decide (seleção ou fallback)
-        this.#toolbar.appendChild(
-            this.#selectFontSize = this.#createSelect(wxConfig.fontSizeList, "Selecionar tamanho da fonte", () => this.#setFontSize())
-        )
-
+        this.#toolbar.appendChild(this.#selectFontSize = this.#createSelect(wxConfig.fontSizeList, "Selecionar tamanho da fonte", () => this.#setFontSize()))
         // cor -> wxPage decide
         this.#toolbar.appendChild(this.#createInputColor())
-
         // estilos (b/i/u etc) — por enquanto via execCommand/wxConfig
-        this.#toolbar.appendChild(
-            this.#selectFontStyles = this.#createSelect(wxConfig.fontStyleList, "Estilizar texto/parágrafo selecionado", () => this.#setFontStyle())
-        )
-
+        this.#toolbar.appendChild(this.#selectFontStyles = this.#createSelect(wxConfig.fontStyleList, "Estilizar texto/parágrafo selecionado", () => this.#setFontStyle()))
         // orientação / formato (mexem na largura da página)
-        this.#toolbar.appendChild(
-            this.#selectOrientations = this.#createSelect(wxConfig.pageOrientationList, "Selecionar orientação da página", () => this.#setOrientation())
-        )
-
-        this.#toolbar.appendChild(
-            this.#selectPaperFormats = this.#createSelect(wxConfig.paperFormatList, "Selecionar formato da folha", () => this.#setPaperFormat())
-        )
-
+        this.#toolbar.appendChild(this.#selectOrientations = this.#createSelect(wxConfig.pageOrientationList, "Selecionar orientação da página", () => this.#setOrientation()))
+        this.#toolbar.appendChild(this.#selectPaperFormats = this.#createSelect(wxConfig.paperFormatList, "Selecionar formato da folha", () => this.#setPaperFormat()))
         // alinhamento -> wxPage decide alvo
-        this.#toolbar.appendChild(
-            this.#selectAlignments = this.#createSelect(wxConfig.alignmentList, "Selecionar alinhamento", () => this.#setAlignment())
-        )
-
+        this.#toolbar.appendChild(this.#selectAlignments = this.#createSelect(wxConfig.alignmentList, "Selecionar alinhamento", () => this.#setAlignment()))
         // inserir imagem
         this.#toolbar.appendChild(this.#inputFile = this.#createInputFile())
         this.#toolbar.appendChild(this.#createButton("🖼️⬆", "Inserir imagem", () => this.#inputFile.click()))
-
         // resize / move genéricos -> wxPage decide alvo
         this.#toolbar.appendChild(this.#createButton("+", "Aumentar", () => wxPage.increase()))
         this.#toolbar.appendChild(this.#createButton("-", "Diminuir", () => wxPage.decrease()))
-        this.#toolbar.appendChild(this.#createButton("▦+", "Inserir tabela", async () => this.#createTable())
-        )
+        this.#toolbar.appendChild(this.#createButton("▦+", "Inserir tabela", async () => this.#createTable()))
         this.#toolbar.appendChild(this.#createButton("⬅", "Mover esquerda", () => wxPage.left()))
         this.#toolbar.appendChild(this.#createButton("➡", "Mover direita", () => wxPage.right()))
         this.#toolbar.appendChild(this.#createButton("⬆", "Mover cima", () => wxPage.up()))
         this.#toolbar.appendChild(this.#createButton("⬇", "Mover baixo", () => wxPage.down()))
-
         // borda -> wxPage decide alvo (e recebe cor)
-        this.#toolbar.appendChild(
-            this.#selectBorders = this.#createSelect(wxConfig.borderList, "Selecionar borda", () => this.#setBorder())
-        )
-
+        this.#toolbar.appendChild(this.#selectBorders = this.#createSelect(wxConfig.borderList, "Selecionar borda", () => this.#setBorder()))
         // radius -> wxPage decide alvo
-        this.#toolbar.appendChild(
-            this.#selectBorderRadius = this.#createSelect(wxConfig.borderRadiusList, "Selecionar raio da borda", () => this.#setBorderRadius())
-        )
-
+        this.#toolbar.appendChild(this.#selectBorderRadius = this.#createSelect(wxConfig.borderRadiusList, "Selecionar raio da borda", () => this.#setBorderRadius()))
+        // toggle insert/overwrite mode
         this.#toolbar.appendChild(this.#buttonEditMode = this.#createButton(wxConfig.K_INSERT_MODE, "Modo inserção/sobrescrita", () => this.#toggleEditMode()))
-        
         this.#initializeDefaults()
+    }
+
+    get owner() {
+        return this.#template
     }
 
     get element() {
@@ -113,11 +90,6 @@ export default class wxToolbar {
             wxRange.applyFontStyle(value)
             return
         }
-
-        // 2) Sem seleção (por enquanto não faz nada)
-        // depois você pode decidir comportamento tipo Word:
-        // - setar estado futuro
-        // - ou aplicar no parágrafo inteiro
     }
 
     #setFontFamily() {
@@ -183,7 +155,7 @@ export default class wxToolbar {
         inputColor.classList.add("control")
         inputColor.addEventListener("change", () => {
             this.#selectedColor = inputColor.value
-            this.#owner.setColor(this.#selectedColor)
+            this.#template.setColor(this.#selectedColor)
         })
 
         return inputColor
@@ -231,9 +203,9 @@ export default class wxToolbar {
         if (!paper)
             return
         if (value === wxConfig.K_LANDSCAPE)
-            this.#owner.root.style.width = paper.height ?? ""
+            this.#template.element.style.width = paper.height
         else
-            this.#owner.element.style.width = paper.width ?? ""
+            this.#template.element.style.width = paper.width
 
         return true
     }
@@ -250,7 +222,7 @@ export default class wxToolbar {
         const paper = wxConfig.paperFormatList.find(p => p.value === value)
         if (!paper)
             return false
-        this.#owner.element.style.width = (orient.value === wxConfig.K_LANDSCAPE ? paper.height : paper.width) ?? ""
+        this.#template.element.style.width = (orient.value === wxConfig.K_LANDSCAPE ? paper.height : paper.width) ?? ""
 
         return true
     }
@@ -274,10 +246,6 @@ export default class wxToolbar {
 
     /** aplica os defaults marcados no wxConfig (selected:true) */
     #initializeDefaults() {
-        /**
-         * @param {readonly wdxItem[]} list
-         * @param {HTMLSelectElement} select
-         */
         const dispatchSelected = (list, select) => {
             const i = list.findIndex((item) => !!item.selected)
             if (i !== -1) {
@@ -285,7 +253,6 @@ export default class wxToolbar {
                 select.dispatchEvent(new Event("change", { bubbles: true }))
             }
         }
-
         dispatchSelected(wxConfig.fontStyleList, this.#selectFontStyles)
         dispatchSelected(wxConfig.alignmentList, this.#selectAlignments)
         dispatchSelected(wxConfig.fontFamilyList, this.#selectFontFamily)
@@ -301,7 +268,7 @@ export default class wxToolbar {
     #toggleEditMode() {
         this.editMode = this.isInsertMode ? wxConfig.K_OVERWRITE_MODE : wxConfig.K_INSERT_MODE
     }
-    /** @param {string} mode */
+    
     set editMode(mode) {
         this.#buttonEditMode.textContent = mode
         const color = mode === wxConfig.K_OVERWRITE_MODE ? wxConfig.K_OVERWRITE_COLOR : wxConfig.K_INSERT_COLOR
@@ -309,12 +276,6 @@ export default class wxToolbar {
         this.element.style.caretColor = color
     }
 
-    /**
-     * @param {ReadonlyArray<wdxItem>} templateList
-     * @param {string} title
-     * @param {(() => void)|undefined} [eventChange]
-     * @returns {HTMLSelectElement}
-     */
      #createSelect(templateList, title, eventChange = undefined) {
         const select = document.createElement("select")
         select.classList.add("control")
@@ -333,12 +294,6 @@ export default class wxToolbar {
         return select
     }
 
-    /**
-     * @param {HTMLSelectElement} selectElement
-     * @param {ReadonlyArray<wdxItem>} selectList
-     * @param {string} [value]
-     * @returns {HTMLSelectElement}
-     */
     #mountSelect(selectElement, selectList, value = "") {
         let bold = true
         selectElement.options.length = 0
@@ -357,10 +312,6 @@ export default class wxToolbar {
         return selectElement
     }
 
-    /**
-     * @param {HTMLSelectElement} selectElement
-     * @param {ReadonlyArray<wdxItem>} templateList
-     */
      #toggleSelectOption(selectElement, templateList) {
         const value = selectElement.options[selectElement.selectedIndex].value
         if (!value) return
@@ -370,12 +321,6 @@ export default class wxToolbar {
         this.#mountSelect(selectElement, templateList, value)
     }
 
-    /**
-     * @param {string} textContent
-     * @param {string} title
-     * @param {(ev: MouseEvent) => void} functionClick
-     * @returns {HTMLButtonElement}
-     */
     #createButton(textContent, title, functionClick) {
         const button = document.createElement("button")
         button.textContent = textContent
@@ -385,9 +330,6 @@ export default class wxToolbar {
         return button
     }
 
-    /**
-     * @param {HTMLSelectElement} select
-     */
     #getHTMLSelectElementValue(select) {
         if (select.selectedIndex < 0)
             return ""
@@ -398,10 +340,11 @@ export default class wxToolbar {
     get isInsertMode() {
         return this.#buttonEditMode.textContent === wxConfig.K_INSERT_MODE
     }
+    
     get isOverwriteMode() {
         return this.#buttonEditMode.textContent === wxConfig.K_OVERWRITE_MODE
     }
-    /** @returns {`${typeof wxConfig.K_INSERT_MODE}|${typeof wxConfig.K_OVERWRITE_MODE}`} */
+
     get editMode() {
         return /** @type {`${typeof wxConfig.K_INSERT_MODE}|${typeof wxConfig.K_OVERWRITE_MODE}`} */ (this.#buttonEditMode.textContent);
     }

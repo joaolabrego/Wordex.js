@@ -8,19 +8,15 @@ import wxTable from "./wxTable.mjs"
 import wxToolbar from "./wxToolbar.mjs"
 
 export default class wxTemplate {
-  #page
-  #toolbar
+  #page = null
+  #toolbar = null
+  #objects = []
 
-  #pages = []
-  #sections = []
-  #paragraphs = []
-  #images = []
-  #tables = []
   constructor() {
     this.#toolbar = new wxToolbar(this.#page = new wxPage(this))
 
     document.body.replaceChildren(this.#toolbar.element, this.#page.element)
-    
+
     //this.#page.body.firstParagraph?.selectParagraph()
   }
 
@@ -28,28 +24,9 @@ export default class wxTemplate {
     return this.#toolbar
   }
 
-  addPage(object) {
-    if (this.#pages.findIndex(obj => obj === object) === -1)
-      this.#pages.push(object)
-  }
-
-  addSection(object) {
-    if (this.#sections.findIndex(obj => obj === object) === -1)
-      this.#sections.push(object)
-  }
-
-  addParagraph(object) {
-    if (this.#paragraphs.findIndex(obj => obj === object) === -1)
-      this.#paragraphs.push(object)
-  }
-
-  addImage(object) {
-    if (this.#images.findIndex(obj => obj === object) === -1)
-      this.#images.push(object)
-  }
- 
-  addTable(object) {
-    if (this.#tables.findIndex(obj => obj === object) === -1)
-      this.#tables.push(object)
+  add(object) {
+    if (this.#objects.findIndex(obj => obj === object) === -1)
+      this.#objects.push(object)
+    console.log(this.#objects)
   }
 }
