@@ -1,17 +1,17 @@
 "use strict"
 
-import wxSection from "./wxSection.mjs"
-import wxRange from "./wxRange.mjs"
+import WdxSection from "./WdxSection.mjs"
+import SysRange from "./SysRange.mjs"
 
 /**
- * wxTableCell
+ * WdxTableCell
  * - mantém célula ativa
  * - (opcional) seleção múltipla de células (Alt+Click = toggle)
  * - aplica operações diretamente no TD/TH (sem execCommand)
  *
  * Obs: por enquanto não lida com rowspan/colspan como “grade lógica”.
  */
-export default class wxTableCell {
+export default class WdxTableCell {
     static #activeCell = null
     static #selectedCells = new Set()
 
@@ -27,18 +27,18 @@ export default class wxTableCell {
             const t = /** @type {HTMLElement} */ (e.target)
             const cell = t.closest("td, th")
             if (!(cell instanceof HTMLTableCellElement)) {
-                wxTableCell.#clearActive()
+                WdxTableCell.#clearActive()
                 return
             }
 
-            wxTableCell.#setActive(cell)
+            WdxTableCell.#setActive(cell)
 
             if (e.altKey) {
-                wxTableCell.toggleSelect(cell)
+                WdxTableCell.toggleSelect(cell)
                 e.preventDefault()
             } else {
                 // click normal: se tinha seleção múltipla, zera
-                if (wxTableCell.#selectedCells.size) wxTableCell.clearSelection()
+                if (WdxTableCell.#selectedCells.size) WdxTableCell.clearSelection()
             }
         })
     }
@@ -47,33 +47,33 @@ export default class wxTableCell {
     // estado
     // -----------------------------
     static hasActive() {
-        return !!wxTableCell.#activeCell
+        return !!WdxTableCell.#activeCell
     }
 
     static getActive() {
-        return wxTableCell.#activeCell
+        return WdxTableCell.#activeCell
     }
 
     static hasSelection() {
-        return wxTableCell.#selectedCells.size > 0
+        return WdxTableCell.#selectedCells.size > 0
     }
 
     static getSelected() {
-        return Array.from(wxTableCell.#selectedCells)
+        return Array.from(WdxTableCell.#selectedCells)
     }
 
     static clearSelection() {
-        for (const c of wxTableCell.#selectedCells) c.classList.remove("cell-selected")
-        wxTableCell.#selectedCells.clear()
+        for (const c of WdxTableCell.#selectedCells) c.classList.remove("cell-selected")
+        WdxTableCell.#selectedCells.clear()
     }
 
     static toggleSelect(cell) {
-        if (wxTableCell.#selectedCells.has(cell)) {
-            wxTableCell.#selectedCells.delete(cell)
+        if (WdxTableCell.#selectedCells.has(cell)) {
+            WdxTableCell.#selectedCells.delete(cell)
             cell.classList.remove("cell-selected")
             return false
         }
-        wxTableCell.#selectedCells.add(cell)
+        WdxTableCell.#selectedCells.add(cell)
         cell.classList.add("cell-selected")
         return true
     }
@@ -86,7 +86,7 @@ export default class wxTableCell {
      * cmd: "left" | "center" | "right" | "justify"
      */
     static align(cmd, cell = null) {
-        cell = cell ?? wxTableCell.#activeCell
+        cell = cell ?? WdxTableCell.#activeCell
         if (!cell) return false
 
         const val =
@@ -96,8 +96,8 @@ export default class wxTableCell {
                         "justify"
 
         // aplica na ativa e/ou nas selecionadas (se existirem)
-        if (wxTableCell.#selectedCells.size) {
-            for (const c of wxTableCell.#selectedCells) c.style.textAlign = val
+        if (WdxTableCell.#selectedCells.size) {
+            for (const c of WdxTableCell.#selectedCells) c.style.textAlign = val
             return true
         }
 
@@ -106,13 +106,13 @@ export default class wxTableCell {
     }
 
     static applyBorder(widthPx, color, cell = null) {
-        cell = cell ?? wxTableCell.#activeCell
+        cell = cell ?? WdxTableCell.#activeCell
         if (!cell) return false
 
         const style = widthPx === "0px" ? "none" : "solid"
 
-        if (wxTableCell.#selectedCells.size) {
-            for (const c of wxTableCell.#selectedCells) {
+        if (WdxTableCell.#selectedCells.size) {
+            for (const c of WdxTableCell.#selectedCells) {
                 c.style.borderStyle = style
                 c.style.borderWidth = widthPx
                 c.style.borderColor = color
@@ -127,11 +127,11 @@ export default class wxTableCell {
     }
 
     static applyBorderRadius(radiusPx, cell = null) {
-        cell = cell ?? wxTableCell.#activeCell
+        cell = cell ?? WdxTableCell.#activeCell
         if (!cell) return false
 
-        if (wxTableCell.#selectedCells.size) {
-            for (const c of wxTableCell.#selectedCells) c.style.borderRadius = radiusPx
+        if (WdxTableCell.#selectedCells.size) {
+            for (const c of WdxTableCell.#selectedCells) c.style.borderRadius = radiusPx
             return true
         }
 
@@ -140,11 +140,11 @@ export default class wxTableCell {
     }
 
     static setTextColor(hex, cell = null) {
-        cell = cell ?? wxTableCell.#activeCell
+        cell = cell ?? WdxTableCell.#activeCell
         if (!cell || !hex) return false
 
-        if (wxTableCell.#selectedCells.size) {
-            for (const c of wxTableCell.#selectedCells) c.style.color = hex
+        if (WdxTableCell.#selectedCells.size) {
+            for (const c of WdxTableCell.#selectedCells) c.style.color = hex
             return true
         }
 
@@ -153,11 +153,11 @@ export default class wxTableCell {
     }
 
     static setFontFamily(name, cell = null) {
-        cell = cell ?? wxTableCell.#activeCell
+        cell = cell ?? WdxTableCell.#activeCell
         if (!cell || !name) return false
 
-        if (wxTableCell.#selectedCells.size) {
-            for (const c of wxTableCell.#selectedCells) c.style.fontFamily = name
+        if (WdxTableCell.#selectedCells.size) {
+            for (const c of WdxTableCell.#selectedCells) c.style.fontFamily = name
             return true
         }
 
@@ -166,11 +166,11 @@ export default class wxTableCell {
     }
 
     static setFontSize(sizeCss, cell = null) {
-        cell = cell ?? wxTableCell.#activeCell
+        cell = cell ?? WdxTableCell.#activeCell
         if (!cell || !sizeCss) return false
 
-        if (wxTableCell.#selectedCells.size) {
-            for (const c of wxTableCell.#selectedCells) c.style.fontSize = sizeCss
+        if (WdxTableCell.#selectedCells.size) {
+            for (const c of WdxTableCell.#selectedCells) c.style.fontSize = sizeCss
             return true
         }
 
@@ -182,17 +182,17 @@ export default class wxTableCell {
     // internos (foco/caret)
     // -----------------------------
     static #setActive(cell) {
-        if (wxTableCell.#activeCell === cell) return
+        if (WdxTableCell.#activeCell === cell) return
 
-        if (wxTableCell.#activeCell) wxTableCell.#activeCell.classList.remove("cell-active")
-        wxTableCell.#activeCell = cell
+        if (WdxTableCell.#activeCell) WdxTableCell.#activeCell.classList.remove("cell-active")
+        WdxTableCell.#activeCell = cell
         cell.classList.add("cell-active")
 
         // garante lugar pro caret
         if (!cell.firstChild) cell.appendChild(document.createElement("br"))
 
-        // joga o caret pra dentro (coerente com seu modelo wxRange.range)
-        wxSection.getRoot()?.focus({ preventScroll: true })
+        // joga o caret pra dentro (coerente com seu modelo SysRange.range)
+        WdxSection.getRoot()?.focus({ preventScroll: true })
         const r = document.createRange()
         r.selectNodeContents(cell)
         r.collapse(true)
@@ -201,11 +201,11 @@ export default class wxTableCell {
         sel?.removeAllRanges()
         sel?.addRange(r)
 
-        wxRange.saveSelection()
+        SysRange.saveSelection()
     }
 
     static #clearActive() {
-        if (wxTableCell.#activeCell) wxTableCell.#activeCell.classList.remove("cell-active")
-        wxTableCell.#activeCell = null
+        if (WdxTableCell.#activeCell) WdxTableCell.#activeCell.classList.remove("cell-active")
+        WdxTableCell.#activeCell = null
     }
 }

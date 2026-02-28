@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="./favicon.ico">
+    <link rel="stylesheet" href="./css/normalize.css">
     <title>Wordex</title>
 </head>
 <script type="module" defer>
-    import wxTemplate from "./mjs/wxTemplate.mjs"
-    new wxTemplate()
+    import wxBody from "./mjs/wxBody.mjs"
+    import Wordex from "./mjs/Wordex.mjs"
+    new Wordex(new wxBody())
 </script>
 
 <body>

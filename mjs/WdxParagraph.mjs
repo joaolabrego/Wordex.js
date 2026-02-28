@@ -1,38 +1,32 @@
 "use strict"
 
-import wxConfig from "./wxConfig.mjs"
-import wdxSection from "./wxSection.mjs"
-import wxRange from "./wxRange.mjs"
+import Config from "./Config.mjs"
+import wdxSection from "./WdxSection.mjs"
+import SysRange from "./SysRange.mjs"
 
-export default class wxParagraph {
+export default class WdxParagraph {
     static #selected = null
 
-    #section
-    #paragraph
+    #WdxSection
+    #wdxParagraph
 
     constructor(section) {
-        this.#section = section
+        this.#WdxSection = section
 
-        this.#paragraph = /** @type {wdxParagraph} */(document.createElement("div"))
-        this.#paragraph.id = `paragraph${crypto.randomUUID()}`
-        this.#paragraph.dataset.wxKind = "paragraph"
-        this.#paragraph.tabIndex = -1
-        this.#paragraph.classList.add("paragraph")
-        this.#paragraph.append(document.createElement("br"))
+        this.#wdxParagraph = (document.createElement("div"))
+        this.#wdxParagraph.dataset.wxKind = "paragraph"
+        this.#wdxParagraph.tabIndex = -1
+        this.#wdxParagraph.classList.add("paragraph")
+        this.#wdxParagraph.append(document.createElement("br"))
     }
     get owner() {
-        return this.#section
+        return this.#WdxSection
     }
     get element() {
-        return this.#paragraph
+        return this.#wdxParagraph
     }
-
-    get focused() {
-        return this.#paragraph.dataset.wdxFocused
-    }
-
-    setFocused(focused) {
-        this.#paragraph.dataset.wdxFocused = focused
+    get htmlTag() {
+        return "div"
     }
 
     static #applySelectionRing(p) {
@@ -55,30 +49,30 @@ export default class wxParagraph {
 
             const p = t.closest("div")
             if (!(p instanceof HTMLDivElement) || p.parentElement !== rootSection) {
-                wxParagraph.#clear()
+                WdxParagraph.#clear()
                 return
             }
 
-            wxParagraph.focus(p)
+            WdxParagraph.focus(p)
         })
     }
 
-    static hasFocus() { return !!wxParagraph.#selected }
-    static getFocused() { return wxParagraph.#selected }
+    static hasFocus() { return !!WdxParagraph.#selected }
+    static getFocused() { return WdxParagraph.#selected }
 
     static focus(p) {
-        wxParagraph.#clear()
-        wxParagraph.#selected = p
+        WdxParagraph.#clear()
+        WdxParagraph.#selected = p
         p.classList.add("p-selected")
-        wxParagraph.#applySelectionRing(p)
+        WdxParagraph.#applySelectionRing(p)
     }
 
     static #clear() {
-        if (wxParagraph.#selected) {
-            wxParagraph.#selected.classList.remove("p-selected")
-            wxParagraph.#removeSelectionRing(wxParagraph.#selected)
+        if (WdxParagraph.#selected) {
+            WdxParagraph.#selected.classList.remove("p-selected")
+            WdxParagraph.#removeSelectionRing(WdxParagraph.#selected)
         }
-        wxParagraph.#selected = null
+        WdxParagraph.#selected = null
     }
 
     static activate(p, where = "end") {
@@ -93,19 +87,19 @@ export default class wxParagraph {
         if (!sel) return false
         sel.removeAllRanges()
         sel.addRange(r)
-        wxRange.saveSelection()
+        SysRange.saveSelection()
         return true
     }
 
     /** garante que o execCommand vai atuar no lugar certo */
     static #restore() {
-        return wxRange.restoreRange(wxRange.range)
+        return SysRange.restoreRange(SysRange.range)
     }
 
-    static alignLeft() { wxParagraph.#restore(); return wxConfig.exec("justifyLeft") }
-    static alignCenter() { wxParagraph.#restore(); return wxConfig.exec("justifyCenter") }
-    static alignRight() { wxParagraph.#restore(); return wxConfig.exec("justifyRight") }
-    static justify() { wxParagraph.#restore(); return wxConfig.exec("justifyFull") }
+    static alignLeft() { WdxParagraph.#restore(); return Config.exec("justifyLeft") }
+    static alignCenter() { WdxParagraph.#restore(); return Config.exec("justifyCenter") }
+    static alignRight() { WdxParagraph.#restore(); return Config.exec("justifyRight") }
+    static justify() { WdxParagraph.#restore(); return Config.exec("justifyFull") }
 
     static getActiveParagraph() {
         const sel = window.getSelection()
@@ -125,8 +119,8 @@ export default class wxParagraph {
     }
 
     static getActive() {
-        wxParagraph.#restore()
-        const p = wxParagraph.getActiveParagraph()
+        WdxParagraph.#restore()
+        const p = WdxParagraph.getActiveParagraph()
         return /** @type {HTMLDivElement|null} */ (p)
     }
 
@@ -135,7 +129,7 @@ export default class wxParagraph {
     // =========================================================
 
     static increaseWidth(stepPx = 30) {
-        const p = wxParagraph.#selected ?? wxParagraph.getActive()
+        const p = WdxParagraph.#selected ?? WdxParagraph.getActive()
         if (!p) return false
 
         const w = Math.round(p.getBoundingClientRect().width) || 0
@@ -145,7 +139,7 @@ export default class wxParagraph {
     }
 
     static decreaseWidth(stepPx = 30, minPx = 80) {
-        const p = wxParagraph.#selected ?? wxParagraph.getActive()
+        const p = WdxParagraph.#selected ?? WdxParagraph.getActive()
         if (!p) return false
 
         const w = Math.round(p.getBoundingClientRect().width) || 0
@@ -161,7 +155,7 @@ export default class wxParagraph {
     /** Move parágrafo selecionado 1 posição para cima (entre irmãos do rootSection). */
     static moveUp() {
         const rootSection = wdxSection.getRoot()
-        const p = wxParagraph.#selected
+        const p = WdxParagraph.#selected
         if (!rootSection || !p) return false
 
         const prev = p.previousElementSibling
@@ -169,15 +163,15 @@ export default class wxParagraph {
 
         rootSection.insertBefore(p, prev)
 
-        wxParagraph.activate(p, "start")
-        wxParagraph.focus(p)
+        WdxParagraph.activate(p, "start")
+        WdxParagraph.focus(p)
         return true
     }
 
     /** Move parágrafo selecionado 1 posição para baixo (entre irmãos do rootSection). */
     static moveDown() {
         const rootSection = wdxSection.getRoot()
-        const p = wxParagraph.#selected
+        const p = WdxParagraph.#selected
         if (!rootSection || !p) return false
 
         const next = p.nextElementSibling
@@ -185,14 +179,14 @@ export default class wxParagraph {
 
         rootSection.insertBefore(next, p) // troca
 
-        wxParagraph.activate(p, "start")
-        wxParagraph.focus(p)
+        WdxParagraph.activate(p, "start")
+        WdxParagraph.focus(p)
         return true
     }
 
     /** “Mover para a direita” = indent (margin-left). */
     static indent(stepPx = 20) {
-        const p = wxParagraph.#selected ?? wxParagraph.getActive()
+        const p = WdxParagraph.#selected ?? WdxParagraph.getActive()
         if (!p) return false
 
         const cur = parseInt(p.style.marginLeft || "0", 10) || 0
@@ -202,7 +196,7 @@ export default class wxParagraph {
 
     /** “Mover para a esquerda” = outdent (margin-left). */
     static outdent(stepPx = 20) {
-        const p = wxParagraph.#selected ?? wxParagraph.getActive()
+        const p = WdxParagraph.#selected ?? WdxParagraph.getActive()
         if (!p) return false
 
         const cur = parseInt(p.style.marginLeft || "0", 10) || 0
@@ -216,31 +210,31 @@ export default class wxParagraph {
 
     /** + (toolbar) */
     static increase(stepPx = 30) {
-        return wxParagraph.increaseWidth(stepPx)
+        return WdxParagraph.increaseWidth(stepPx)
     }
 
     /** - (toolbar) */
     static decrease(stepPx = 30, minPx = 80) {
-        return wxParagraph.decreaseWidth(stepPx, minPx)
+        return WdxParagraph.decreaseWidth(stepPx, minPx)
     }
 
     /** ⬅ (toolbar) */
     static left(stepPx = 20) {
-        return wxParagraph.outdent(stepPx)
+        return WdxParagraph.outdent(stepPx)
     }
 
     /** ➡ (toolbar) */
     static right(stepPx = 20) {
-        return wxParagraph.indent(stepPx)
+        return WdxParagraph.indent(stepPx)
     }
 
     /** ⬆ (toolbar) */
     static up() {
-        return wxParagraph.moveUp()
+        return WdxParagraph.moveUp()
     }
 
     /** ⬇ (toolbar) */
     static down() {
-        return wxParagraph.moveDown()
+        return WdxParagraph.moveDown()
     }
 }

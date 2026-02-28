@@ -1,18 +1,18 @@
 "use strict"
 
-import wxSection from "./wxSection.mjs"
-import wxRange from "./wxRange.mjs"
-import wxGrid from "./wxTable.mjs"
+import WdxSection from "./WdxSection.mjs"
+import SysRange from "./SysRange.mjs"
+import wxGrid from "./WdxTable.mjs"
 
 /**
- * wxTableCol
+ * WdxTableCol
  * - mantém “coluna ativa” e “colunas selecionadas”
  * - seleção provisória: Alt+Click numa célula => toggle da coluna daquela célula
  * - aplica operações na coluna iterando linhas e pegando cellIndex
  *
  * Observação: não trata colspan/rowspan (por enquanto).
  */
-export default class wxTableCol {
+export default class WdxTableCol {
     static #active = null
     static #selected = new WeakMap()
 
@@ -31,21 +31,21 @@ export default class wxTableCol {
             const idx = cell.cellIndex
             if (idx < 0) return
 
-            wxTableCol.#setActive(table, idx)
+            WdxTableCol.#setActive(table, idx)
 
             if (e.altKey) {
-                wxTableCol.toggleSelect(table, idx)
+                WdxTableCol.toggleSelect(table, idx)
                 e.preventDefault()
             }
         })
     }
 
     static hasActive() {
-        return !!wxTableCol.#active
+        return !!WdxTableCol.#active
     }
 
     static getActive() {
-        return wxTableCol.#active
+        return WdxTableCol.#active
     }
 
     /**
@@ -62,17 +62,17 @@ export default class wxTableCol {
     }
 
     static getSelected(table) {
-        return Array.from(wxTableCol.#selected.get(table) ?? [])
+        return Array.from(WdxTableCol.#selected.get(table) ?? [])
     }
 
     static hasSelection(table) {
-        return (wxTableCol.#selected.get(table)?.size ?? 0) > 0
+        return (WdxTableCol.#selected.get(table)?.size ?? 0) > 0
     }
 
     static clearSelection(table) {
-        const set = wxTableCol.#selected.get(table)
+        const set = WdxTableCol.#selected.get(table)
         if (!set) return
-        for (const idx of set) wxTableCol.#applyClassToColumn(table, idx, "col-selected", false)
+        for (const idx of set) WdxTableCol.#applyClassToColumn(table, idx, "col-selected", false)
         set.clear()
     }
 
@@ -80,20 +80,20 @@ export default class wxTableCol {
      * Toggle seleção de coluna
      */
     static toggleSelect(table, idx) {
-        let set = wxTableCol.#selected.get(table)
+        let set = WdxTableCol.#selected.get(table)
         if (!set) {
             set = new Set()
-            wxTableCol.#selected.set(table, set)
+            WdxTableCol.#selected.set(table, set)
         }
 
         if (set.has(idx)) {
             set.delete(idx)
-            wxTableCol.#applyClassToColumn(table, idx, "col-selected", false)
+            WdxTableCol.#applyClassToColumn(table, idx, "col-selected", false)
             return false
         }
 
         set.add(idx)
-        wxTableCol.#applyClassToColumn(table, idx, "col-selected", true)
+        WdxTableCol.#applyClassToColumn(table, idx, "col-selected", true)
         return true
     }
 
@@ -102,7 +102,7 @@ export default class wxTableCol {
      * cmd: "left" | "center" | "right" | "justify"
      */
     static align(cmd, col = null) {
-        col = col ?? wxTableCol.#active
+        col = col ?? WdxTableCol.#active
         if (!col) return false
 
         const val =
@@ -111,7 +111,7 @@ export default class wxTableCol {
                     cmd === "right" ? "right" :
                         "justify"
 
-        for (const cell of wxTableCol.#iterColumnCells(col.table, col.index)) {
+        for (const cell of WdxTableCol.#iterColumnCells(col.table, col.index)) {
             cell.style.textAlign = val
         }
         return true
@@ -121,11 +121,11 @@ export default class wxTableCol {
      * Aplica border nas células da coluna.
      */
     static applyBorder(widthPx, color, col = null) {
-        col = col ?? wxTableCol.#active
+        col = col ?? WdxTableCol.#active
         if (!col) return false
 
         const style = widthPx === "0px" ? "none" : "solid"
-        for (const cell of wxTableCol.#iterColumnCells(col.table, col.index)) {
+        for (const cell of WdxTableCol.#iterColumnCells(col.table, col.index)) {
             cell.style.borderStyle = style
             cell.style.borderWidth = widthPx
             cell.style.borderColor = color
@@ -138,25 +138,25 @@ export default class wxTableCol {
     // -----------------------------
 
     static #setActive(table, idx) {
-        const prev = wxTableCol.#active
+        const prev = WdxTableCol.#active
         if (prev && prev.table === table && prev.index === idx) return
 
-        if (prev) wxTableCol.#applyClassToColumn(prev.table, prev.index, "col-active", false)
+        if (prev) WdxTableCol.#applyClassToColumn(prev.table, prev.index, "col-active", false)
 
-        wxTableCol.#active = { table, index: idx }
-        wxTableCol.#applyClassToColumn(table, idx, "col-active", true)
+        WdxTableCol.#active = { table, index: idx }
+        WdxTableCol.#applyClassToColumn(table, idx, "col-active", true)
 
         // Opcional: ao ativar coluna, joga caret na 1ª célula “existente”
-        const firstCell = wxTableCol.#findFirstCellInColumn(table, idx)
+        const firstCell = WdxTableCol.#findFirstCellInColumn(table, idx)
         if (firstCell) {
-            wxSection.getRoot()?.focus({ preventScroll: true })
+            WdxSection.getRoot()?.focus({ preventScroll: true })
             const r = document.createRange()
             r.selectNodeContents(firstCell)
             r.collapse(true)
             const sel = window.getSelection()
             sel?.removeAllRanges()
             sel?.addRange(r)
-            wxRange.saveSelection()
+            SysRange.saveSelection()
         }
     }
 
@@ -170,12 +170,12 @@ export default class wxTableCol {
     }
 
     static #findFirstCellInColumn(table, idx) {
-        for (const cell of wxTableCol.#iterColumnCells(table, idx)) return cell
+        for (const cell of WdxTableCol.#iterColumnCells(table, idx)) return cell
         return null
     }
 
     static #applyClassToColumn(table, idx, className, on) {
-        for (const cell of wxTableCol.#iterColumnCells(table, idx)) {
+        for (const cell of WdxTableCol.#iterColumnCells(table, idx)) {
             if (on) cell.classList.add(className)
             else cell.classList.remove(className)
         }

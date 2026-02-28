@@ -1,10 +1,10 @@
 "use strict"
 
-import wxRange from "./wxRange.mjs"
+import SysRange from "./SysRange.mjs"
 
-export default class wxLayout {
+export default class ActLayout {
     // =========================================================
-    // wxAlignment
+    // ActAlignment
     // =========================================================
 
     static alignObject(instance, mode) {
@@ -67,13 +67,13 @@ export default class wxLayout {
 
         if (el instanceof HTMLImageElement) el.style.height = "auto"
 
-        wxRange.saveSelection()
+        SysRange.saveSelection()
         return true
     }    
 
-    static increase(el) { return wxLayout.#resize(el, 1.1) }
+    static increase(el) { return ActLayout.#resize(el, 1.1) }
 
-    static decrease(el) { return wxLayout.#resize(el, 0.9) }
+    static decrease(el) { return ActLayout.#resize(el, 0.9) }
 
     static normalizeJustify(justifyCmd) {
         if (justifyCmd === "justifyLeft") return "left"

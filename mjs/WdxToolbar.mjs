@@ -1,15 +1,15 @@
 "use strict"
 
-import wxConfig from "./wxConfig.mjs"
-import wxPage from "./wxPage.mjs"
-import wxRange from "./wxRange.mjs"
-import wxPicture from "./wxImage.mjs"
-import wxSection from "./wxSection.mjs"
-import wxAlignment from "./wxAlignment.mjs"
+import Config from "./Config.mjs"
+import wxPage from "./WdxDocument.mjs"
+import SysRange from "./SysRange.mjs"
+import wxPicture from "./WdxImage.mjs"
+import WdxSection from "./WdxSection.mjs"
+import ActAlignment from "./ActAlignment.mjs"
 
 /** @typedef {import("./wdxTypes.mjs").wdxItem} wdxItem */
 
-export default class wxToolbar {
+export default class WdxToolbar {
     #toolbar
     #selectFontStyles
     #selectAlignments
@@ -22,31 +22,31 @@ export default class wxToolbar {
     #buttonEditMode
     #inputFile
     #template
-    #selectedColor = wxConfig.K_DEFAULT_COLOR
+    #selectedColor = Config.K_DEFAULT_COLOR
 
     constructor(template) {
         this.#template = template
         this.#toolbar = document.createElement("div")
 
         const style = document.createElement("style")
-        style.textContent = wxConfig.ScriptToolbar
+        style.textContent = Config.ScriptToolbar
         this.#toolbar.appendChild(style)
 
         this.#toolbar.classList.add("toolbar")
 
         // família da fonte
-        this.#toolbar.appendChild(this.#selectFontFamily = this.#createSelect(wxConfig.fontFamilyList,"Selecionar família da fonte", () => this.#setFontFamily()))
+        this.#toolbar.appendChild(this.#selectFontFamily = this.#createSelect(Config.fontFamilyList,"Selecionar família da fonte", () => this.#setFontFamily()))
         // tamanho -> wxPage decide (seleção ou fallback)
-        this.#toolbar.appendChild(this.#selectFontSize = this.#createSelect(wxConfig.fontSizeList, "Selecionar tamanho da fonte", () => this.#setFontSize()))
+        this.#toolbar.appendChild(this.#selectFontSize = this.#createSelect(Config.fontSizeList, "Selecionar tamanho da fonte", () => this.#setFontSize()))
         // cor -> wxPage decide
         this.#toolbar.appendChild(this.#createInputColor())
-        // estilos (b/i/u etc) — por enquanto via execCommand/wxConfig
-        this.#toolbar.appendChild(this.#selectFontStyles = this.#createSelect(wxConfig.fontStyleList, "Estilizar texto/parágrafo selecionado", () => this.#setFontStyle()))
+        // estilos (b/i/u etc) — por enquanto via execCommand/Config
+        this.#toolbar.appendChild(this.#selectFontStyles = this.#createSelect(Config.fontStyleList, "Estilizar texto/parágrafo selecionado", () => this.#setFontStyle()))
         // orientação / formato (mexem na largura da página)
-        this.#toolbar.appendChild(this.#selectOrientations = this.#createSelect(wxConfig.pageOrientationList, "Selecionar orientação da página", () => this.#setOrientation()))
-        this.#toolbar.appendChild(this.#selectPaperFormats = this.#createSelect(wxConfig.paperFormatList, "Selecionar formato da folha", () => this.#setPaperFormat()))
+        this.#toolbar.appendChild(this.#selectOrientations = this.#createSelect(Config.pageOrientationList, "Selecionar orientação da página", () => this.#setOrientation()))
+        this.#toolbar.appendChild(this.#selectPaperFormats = this.#createSelect(Config.paperFormatList, "Selecionar formato da folha", () => this.#setPaperFormat()))
         // alinhamento -> wxPage decide alvo
-        this.#toolbar.appendChild(this.#selectAlignments = this.#createSelect(wxConfig.alignmentList, "Selecionar alinhamento", () => this.#setAlignment()))
+        this.#toolbar.appendChild(this.#selectAlignments = this.#createSelect(Config.alignmentList, "Selecionar alinhamento", () => this.#setAlignment()))
         // inserir imagem
         this.#toolbar.appendChild(this.#inputFile = this.#createInputFile())
         this.#toolbar.appendChild(this.#createButton("🖼️⬆", "Inserir imagem", () => this.#inputFile.click()))
@@ -59,11 +59,11 @@ export default class wxToolbar {
         this.#toolbar.appendChild(this.#createButton("⬆", "Mover cima", () => wxPage.up()))
         this.#toolbar.appendChild(this.#createButton("⬇", "Mover baixo", () => wxPage.down()))
         // borda -> wxPage decide alvo (e recebe cor)
-        this.#toolbar.appendChild(this.#selectBorders = this.#createSelect(wxConfig.borderList, "Selecionar borda", () => this.#setBorder()))
+        this.#toolbar.appendChild(this.#selectBorders = this.#createSelect(Config.borderList, "Selecionar borda", () => this.#setBorder()))
         // radius -> wxPage decide alvo
-        this.#toolbar.appendChild(this.#selectBorderRadius = this.#createSelect(wxConfig.borderRadiusList, "Selecionar raio da borda", () => this.#setBorderRadius()))
+        this.#toolbar.appendChild(this.#selectBorderRadius = this.#createSelect(Config.borderRadiusList, "Selecionar raio da borda", () => this.#setBorderRadius()))
         // toggle insert/overwrite mode
-        this.#toolbar.appendChild(this.#buttonEditMode = this.#createButton(wxConfig.K_INSERT_MODE, "Modo inserção/sobrescrita", () => this.#toggleEditMode()))
+        this.#toolbar.appendChild(this.#buttonEditMode = this.#createButton(Config.K_INSERT_MODE, "Modo inserção/sobrescrita", () => this.#toggleEditMode()))
         this.#initializeDefaults()
     }
 
@@ -75,19 +75,39 @@ export default class wxToolbar {
         return this.#toolbar
     }
 
+    /** aplica os defaults marcados no Config (selected:true) */
+    #initializeDefaults() {
+        const dispatchSelected = (list, select) => {
+            const i = list.findIndex((item) => !!item.selected)
+            if (i !== -1) {
+                select.selectedIndex = i
+                select.dispatchEvent(new Event("change", { bubbles: true }))
+            }
+        }
+        dispatchSelected(Config.fontStyleList, this.#selectFontStyles)
+        dispatchSelected(Config.alignmentList, this.#selectAlignments)
+        dispatchSelected(Config.fontFamilyList, this.#selectFontFamily)
+        dispatchSelected(Config.fontSizeList, this.#selectFontSize)
+        dispatchSelected(Config.paperFormatList, this.#selectPaperFormats)
+        dispatchSelected(Config.pageOrientationList, this.#selectOrientations)
+        dispatchSelected(Config.borderList, this.#selectBorders)
+        dispatchSelected(Config.borderRadiusList, this.#selectBorderRadius)
+        this.editMode = Config.K_INSERT_MODE
+    }
+
     #setFontStyle() {
         const value = this.#getHTMLSelectElementValue(this.#selectFontStyles)
         if (!value)
             return
         if (value === "none") {
-            wxRange.clearInlineFormatting()
+            SysRange.clearInlineFormatting()
             return true
         }
-        wxRange.restoreRange(wxRange.range)
+        SysRange.restoreRange(SysRange.range)
 
         // 1) Se há seleção de texto → WordexText manda
-        if (wxRange.hasSelection()) {
-            wxRange.applyFontStyle(value)
+        if (SysRange.hasSelection()) {
+            SysRange.applyFontStyle(value)
             return
         }
     }
@@ -96,11 +116,11 @@ export default class wxToolbar {
         const value = this.#getHTMLSelectElementValue(this.#selectFontFamily)
         if (!value)
             return false
-        wxRange.restoreRange(wxRange.range)
+        SysRange.restoreRange(SysRange.range)
 
         const selection = window.getSelection()
         if (!!selection && selection.rangeCount && !selection.getRangeAt(0).collapsed)
-            return wxRange.setFontFamily(value)
+            return SysRange.setFontFamily(value)
 
         const paragraph = wxPage.getParagraphTarget()
         if (paragraph) {
@@ -108,7 +128,7 @@ export default class wxToolbar {
             return true
         }
 
-        const section = wxSection.getRoot()
+        const section = WdxSection.getRoot()
         if (section) {
             section.style.fontFamily = value
             return true
@@ -121,24 +141,24 @@ export default class wxToolbar {
         const value = this.#getHTMLSelectElementValue(this.#selectFontSize)
         if (!value)
             return false
-        const size = wxConfig.fontSizeList.find((p) => p.value === value)
+        const size = Config.fontSizeList.find((p) => p.value === value)
         if (!size)
             return false
 
-        wxRange.restoreRange(wxRange.range)
+        SysRange.restoreRange(SysRange.range)
 
         const selection = window.getSelection()
         const hasSelection = !!selection && selection.rangeCount && !selection.getRangeAt(0).collapsed
 
         if (hasSelection)
-            return !!wxRange.setFontSize(value)
+            return !!SysRange.setFontSize(value)
 
         const paragraph = wxPage.getParagraphTarget()
         if (paragraph) {
             paragraph.style.fontSize = size.value
             return true
         }
-        const section = wxSection.getRoot()
+        const section = WdxSection.getRoot()
         if (section) {
             section.style.fontSize = size.value
             return true
@@ -199,13 +219,13 @@ export default class wxToolbar {
         const value = this.#getHTMLSelectElementValue(this.#selectOrientations)
         if (!value)
             return
-        const paper = wxConfig.paperFormatList.find((p) => p.selected)
+        const paper = Config.paperFormatList.find((p) => p.selected)
         if (!paper)
             return
-        if (value === wxConfig.K_LANDSCAPE)
-            this.#template.element.style.width = paper.height
+        if (value === Config.K_LANDSCAPE)
+            this.#template.document.element.style.width = paper.height
         else
-            this.#template.element.style.width = paper.width
+            this.#template.document.element.style.width = paper.width
 
         return true
     }
@@ -215,14 +235,19 @@ export default class wxToolbar {
         if (!value)
             return false
 
-        const orient = wxConfig.pageOrientationList.find(p => p.selected)
+        const orient = Config.pageOrientationList.find(p => p.selected)
         if (!orient)
             return false
 
-        const paper = wxConfig.paperFormatList.find(p => p.value === value)
+        const paper = Config.paperFormatList.find(p => p.value === value)
         if (!paper)
             return false
-        this.#template.element.style.width = (orient.value === wxConfig.K_LANDSCAPE ? paper.height : paper.width) ?? ""
+        this.#template.document.element.style.width = orient.value === Config.K_LANDSCAPE ? paper.height : paper.width
+        this.#template.objects.filter(obj => obj instanceof WdxSection)
+            .forEach(section => {
+                section.style.minHeight = paper.minHeightEdges
+                section.style.maxHeight = paper.maxHeightEdges
+            })
 
         return true
     }
@@ -230,7 +255,7 @@ export default class wxToolbar {
     #setAlignment() {
         const value = /** @type {"left"|"center"|"right"|"justify"} */(this.#getHTMLSelectElementValue(this.#selectAlignments))
         if (value)
-            wxAlignment.align(value)
+            ActAlignment.align(value)
     }
 
     #setBorder() {
@@ -242,36 +267,14 @@ export default class wxToolbar {
         const value = this.#getHTMLSelectElementValue(this.#selectBorderRadius)
         wxPage.borderRadius(value)
     }
-
-
-    /** aplica os defaults marcados no wxConfig (selected:true) */
-    #initializeDefaults() {
-        const dispatchSelected = (list, select) => {
-            const i = list.findIndex((item) => !!item.selected)
-            if (i !== -1) {
-                select.selectedIndex = i
-                select.dispatchEvent(new Event("change", { bubbles: true }))
-            }
-        }
-        dispatchSelected(wxConfig.fontStyleList, this.#selectFontStyles)
-        dispatchSelected(wxConfig.alignmentList, this.#selectAlignments)
-        dispatchSelected(wxConfig.fontFamilyList, this.#selectFontFamily)
-        dispatchSelected(wxConfig.fontSizeList, this.#selectFontSize)
-        dispatchSelected(wxConfig.paperFormatList, this.#selectPaperFormats)
-        dispatchSelected(wxConfig.pageOrientationList, this.#selectOrientations)
-        dispatchSelected(wxConfig.borderList, this.#selectBorders)
-        dispatchSelected(wxConfig.borderRadiusList, this.#selectBorderRadius)
-        this.editMode = wxConfig.K_INSERT_MODE
-
-    }
     
     #toggleEditMode() {
-        this.editMode = this.isInsertMode ? wxConfig.K_OVERWRITE_MODE : wxConfig.K_INSERT_MODE
+        this.editMode = this.isInsertMode ? Config.K_OVERWRITE_MODE : Config.K_INSERT_MODE
     }
     
     set editMode(mode) {
         this.#buttonEditMode.textContent = mode
-        const color = mode === wxConfig.K_OVERWRITE_MODE ? wxConfig.K_OVERWRITE_COLOR : wxConfig.K_INSERT_COLOR
+        const color = mode === Config.K_OVERWRITE_MODE ? Config.K_OVERWRITE_COLOR : Config.K_INSERT_COLOR
         this.#buttonEditMode.style.background = color
         this.element.style.caretColor = color
     }
@@ -306,7 +309,7 @@ export default class wxToolbar {
                 bold = false
             }
             option.value = item.value
-            option.textContent = (item.selected ? wxConfig.K_OK : "") + item.text
+            option.textContent = (item.selected ? Config.K_OK : "") + item.text
             selectElement.appendChild(option)
         })
         return selectElement
@@ -338,14 +341,14 @@ export default class wxToolbar {
     }
     
     get isInsertMode() {
-        return this.#buttonEditMode.textContent === wxConfig.K_INSERT_MODE
+        return this.#buttonEditMode.textContent === Config.K_INSERT_MODE
     }
     
     get isOverwriteMode() {
-        return this.#buttonEditMode.textContent === wxConfig.K_OVERWRITE_MODE
+        return this.#buttonEditMode.textContent === Config.K_OVERWRITE_MODE
     }
 
     get editMode() {
-        return /** @type {`${typeof wxConfig.K_INSERT_MODE}|${typeof wxConfig.K_OVERWRITE_MODE}`} */ (this.#buttonEditMode.textContent);
+        return /** @type {`${typeof Config.K_INSERT_MODE}|${typeof Config.K_OVERWRITE_MODE}`} */ (this.#buttonEditMode.textContent);
     }
 }

@@ -1,44 +1,51 @@
 'use strict'
 
-import wxEdit from './wxEdit.mjs'
-import wxPage from './wxPage.mjs'
-import wxParagraph from './wxParagraph.mjs'
+import ActEdit from './ActEdit.mjs'
+import wxPage from './WdxDocument.mjs'
+import WdxParagraph from './WdxParagraph.mjs'
 
-export default class wxSection {
+export default class WdxSection {
     static #rootSection
 
-    #page
-    #section
+    #wxPage
+    #wdxSection
     #paragraphs = []
     
-    constructor(page, sector, textContent = "") {
-        this.#page = page
+    constructor(WdxDocument, role, textContent = "") {
+        this.#wxPage = WdxDocument
 
-        this.#section = /** @type {wdxSection} */(document.createElement("div"))
-        this.#section.id = sector
-        this.#section.tabIndex = -1
-        this.#section.dataset.wdxKind = "section"
-        this.#section.dataset.wdxSector = sector
-        this.#section.classList.add("editable", "workspace", sector)
-        this.#section.contentEditable = "true"
-
-        this.#section.addEventListener("keydown", (e) => wxEdit.onKeyDown(e))
-        this.#section.addEventListener("focus", () => wxSection.#rootSection = this.#section)
+        this.#wdxSection = document.createElement("div")
+        this.#wdxSection.tabIndex = -1
+        this.#wdxSection.classList.add("editable", "workspace", role)
+        this.#wdxSection.contentEditable = "true"
+        
+        this.#wxPage.owner.pushAttribute(this.#wdxSection, "wrdKind", "section")
+        this.#wxPage.owner.pushAttribute(this.#wdxSection, "wrdRole", role)
+        this.#wxPage.owner.pushEventListener(this.#wdxSection, "keydown", (e) => ActEdit.onKeyDown(e))
+        this.#wxPage.owner.pushEventListener(this.#wdxSection, "focus", () => WdxSection.#rootSection = this.#wdxSection)
 
         this.addParagraph()
         if (textContent.trim())
             this.#paragraphs[0].element.textContent = textContent
         else
             this.#paragraphs[0].element.appendChild(document.createElement("br"))
-        this.#section.append(this.#paragraphs[0].element)
+        this.#wdxSection.append(this.#paragraphs[0].element)
     }
 
     get owner() {
-        return this.#page
+        return this.#wxPage
     }
 
     get element() {
-        return this.#section
+        return this.#wdxSection
+    }
+
+    get wordex() {
+        return this.ws
+    }
+
+    get htmlTag() {
+        return "div"
     }
 
     selectedParagraph() {
@@ -60,7 +67,7 @@ export default class wxSection {
             selected.dataset.wxSelected = "1"
     }
     addParagraph() {
-        this.#paragraphs.push(new wxParagraph(this.#section))
+        this.#paragraphs.push(new WdxParagraph(this.#wdxSection))
     }
     removeParagraph() {
         const selected = this.selectedParagraph()
@@ -73,19 +80,19 @@ export default class wxSection {
     }
 
     get isSelected() {
-        return this.#section.dataset.wdxKind ? true : false
+        return this.#wdxSection.dataset.wdxKind ? true : false
     }
 
     get isHeader() {
-        return this.#section.dataset.wdxKind === "section" && this.#section.dataset.wdxSector === "header"
+        return this.#wdxSection.dataset.wdxKind === "section" && this.#wdxSection.dataset.wdxSector === "header"
     }
 
     get isBody() {
-        return this.#section.dataset.wdxKind === "section" && this.#section.dataset.wdxSector === "body"
+        return this.#wdxSection.dataset.wdxKind === "section" && this.#wdxSection.dataset.wdxSector === "body"
     }
 
     get isFooter() {
-        return this.#section.dataset.wdxKind === "section" && this.#section.dataset.wdxSector === "footer"
+        return this.#wdxSection.dataset.wdxKind === "section" && this.#wdxSection.dataset.wdxSector === "footer"
     }
 
     get firstParagraph() {
@@ -100,10 +107,10 @@ export default class wxSection {
     }
 
     static getRoot() {
-        return wxSection.#rootSection
+        return WdxSection.#rootSection
     }
 
     static setRoot(value) {
-        wxSection.#rootSection = value
+        WdxSection.#rootSection = value
     }
 }

@@ -1,14 +1,14 @@
 "use strict"
 
-import wxConfig from "./wxConfig.mjs"
-import wxParagraph from "./wxParagraph.mjs"
-import wxSection from "./wxSection.mjs"
+import Config from "./Config.mjs"
+import WdxParagraph from "./WdxParagraph.mjs"
+import WdxSection from "./WdxSection.mjs"
 
-export default class wxRange {
+export default class SysRange {
   static range = null
 
   static saveSelection() {
-    const root = wxSection.getRoot()
+    const root = WdxSection.getRoot()
     if (!root)
       return false
 
@@ -32,7 +32,7 @@ export default class wxRange {
     if (!root.contains(aEl) || !root.contains(fEl))
       return false
 
-    wxRange.range = r.cloneRange()
+    SysRange.range = r.cloneRange()
 
     return true
   }
@@ -60,7 +60,7 @@ export default class wxRange {
   }
 
   static saveRange() {
-    const range = wxRange.getSelRange()
+    const range = SysRange.getSelRange()
     return range ? range.cloneRange() : null
   }
 
@@ -73,7 +73,7 @@ export default class wxRange {
   }
 
   static getSelectedRange() {
-    wxRange.restoreRange(wxRange.range)
+    SysRange.restoreRange(SysRange.range)
 
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0)
@@ -87,11 +87,11 @@ export default class wxRange {
   }
 
   static hasSelection() {
-    return !!wxRange.getSelectedRange()
+    return !!SysRange.getSelectedRange()
   }
 
   static wrapTag(tag, collapse = false) {
-    const range = wxRange.getSelectedRange()
+    const range = SysRange.getSelectedRange()
 
     if (!range)
       return false
@@ -102,45 +102,45 @@ export default class wxRange {
     range.insertNode(element)
 
     if (collapse)
-      return wxRange.#collapseAfter(element)
+      return SysRange.#collapseAfter(element)
 
-    return wxRange.#selectNodeContents(element)
+    return SysRange.#selectNodeContents(element)
   }
 
   static applyFontStyle(value = "") {
     if (!value) {
-      const fontStyle = wxConfig.fontStyleList.find(style => style.selected)
+      const fontStyle = Config.fontStyleList.find(style => style.selected)
       if (!fontStyle)
         return false
       value = fontStyle.value ?? ""
     }
 
-    return wxRange.wrapTag(value)
+    return SysRange.wrapTag(value)
   }
 
   static setFontFamily(cssFontName) {
     if (!cssFontName)
       return false
 
-    return wxRange.wrapSpanStyle({ fontFamily: cssFontName })
+    return SysRange.wrapSpanStyle({ fontFamily: cssFontName })
   }
 
   static setFontSize(cssSize) {
     if (!cssSize)
       return false
 
-    return wxRange.wrapSpanStyle({ fontSize: cssSize })
+    return SysRange.wrapSpanStyle({ fontSize: cssSize })
   }
 
   static setFontColor(hex) {
     if (!hex)
       return false
     
-    return wxRange.wrapSpanStyle({ color: hex })
+    return SysRange.wrapSpanStyle({ color: hex })
   }
 
   static wrapSpanStyle(style) {
-    const range = wxRange.getSelectedRange()
+    const range = SysRange.getSelectedRange()
     if (!range)
       return false
 
@@ -156,7 +156,7 @@ export default class wxRange {
     span.appendChild(fragment)
     range.insertNode(span)
 
-    wxRange.#collapseAfter(span)
+    SysRange.#collapseAfter(span)
 
     return true
   }
@@ -176,7 +176,7 @@ export default class wxRange {
     selection.removeAllRanges()
     selection.addRange(range)
 
-    wxRange.saveSelection()
+    SysRange.saveSelection()
 
     return true
   }
@@ -192,7 +192,7 @@ export default class wxRange {
     selection.removeAllRanges()
     selection.addRange(range)
 
-    wxRange.saveSelection()
+    SysRange.saveSelection()
 
     return true
   }
@@ -202,7 +202,7 @@ export default class wxRange {
    * Mantém o texto e a estrutura (o que não for inline).
    */
   static clearInlineFormatting() {
-    const range = wxRange.getSelectedRange()
+    const range = SysRange.getSelectedRange()
     if (!range || range.collapsed) return false
 
     const frag = range.extractContents()
@@ -260,41 +260,41 @@ export default class wxRange {
       r2.setEndAfter(last)
       sel.removeAllRanges()
       sel.addRange(r2)
-      wxRange.saveSelection()
+      SysRange.saveSelection()
     }
 
     return true
   }
-  // wxRange.mjs
+  // SysRange.mjs
 
   static alignLeft() {
-    return wxRange.#alignText("left")
+    return SysRange.#alignText("left")
   }
 
   static alignCenter() {
-    return wxRange.#alignText("center")
+    return SysRange.#alignText("center")
   }
 
   static alignRight() {
-    return wxRange.#alignText("right")
+    return SysRange.#alignText("right")
   }
 
   static justify() {
-    return wxRange.#alignText("justify")
+    return SysRange.#alignText("justify")
   }
 
   static #alignText(dir) {
     // 1) se há seleção → aplica no(s) parágrafo(s) envolvidos
-    const range = wxRange.getSelectedRange()
+    const range = SysRange.getSelectedRange()
     if (range) {
-      const blocks = wxRange.#getParagraphsFromRange(range)
+      const blocks = SysRange.#getParagraphsFromRange(range)
       for (const p of blocks) p.style.textAlign = dir
-      wxRange.saveSelection()
+      SysRange.saveSelection()
       return true
     }
 
     // 2) sem seleção → parágrafo ativo
-    const p = wxParagraph?.getActive?.()
+    const p = WdxParagraph?.getActive?.()
     if (p) {
       p.style.textAlign = dir
       return true

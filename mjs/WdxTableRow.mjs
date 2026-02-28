@@ -1,16 +1,16 @@
 "use strict"
 
-import wxSection from "./wxSection.mjs"
-import wxRange from "./wxRange.mjs"
-import wxGrid from "./wxTable.mjs"
+import WdxSection from "./WdxSection.mjs"
+import SysRange from "./SysRange.mjs"
+import wxGrid from "./WdxTable.mjs"
 
 /**
- * wxTableRow
+ * WdxTableRow
  * - mantém estado de “linha ativa” e “linhas selecionadas”
  * - não decide política (wxPage decidirá depois)
  * - opera em HTMLTableRowElement (TR)
  */
-export default class wxTableRow {
+export default class WdxTableRow {
     static #activeRow = null
     static #selectedRows = new Set()
 
@@ -35,47 +35,47 @@ export default class wxTableRow {
             // (deixe comentado se preferir)
             // if (wxGrid.getActiveCell?.()) {}
 
-            wxTableRow.#setActive(tr)
+            WdxTableRow.#setActive(tr)
 
             if (e.altKey) {
                 // toggle seleção de linha
-                wxTableRow.toggleSelect(tr)
+                WdxTableRow.toggleSelect(tr)
                 e.preventDefault()
             }
         })
     }
 
     static hasActive() {
-        return !!wxTableRow.#activeRow
+        return !!WdxTableRow.#activeRow
     }
 
     static getActive() {
-        return wxTableRow.#activeRow
+        return WdxTableRow.#activeRow
     }
 
     static getSelected() {
-        return Array.from(wxTableRow.#selectedRows)
+        return Array.from(WdxTableRow.#selectedRows)
     }
 
     static hasSelection() {
-        return wxTableRow.#selectedRows.size > 0
+        return WdxTableRow.#selectedRows.size > 0
     }
 
     static clearSelection() {
-        for (const tr of wxTableRow.#selectedRows) tr.classList.remove("row-selected")
-        wxTableRow.#selectedRows.clear()
+        for (const tr of WdxTableRow.#selectedRows) tr.classList.remove("row-selected")
+        WdxTableRow.#selectedRows.clear()
     }
 
     /**
      * Seleciona (ou desmarca) uma linha.
      */
     static toggleSelect(tr) {
-        if (wxTableRow.#selectedRows.has(tr)) {
-            wxTableRow.#selectedRows.delete(tr)
+        if (WdxTableRow.#selectedRows.has(tr)) {
+            WdxTableRow.#selectedRows.delete(tr)
             tr.classList.remove("row-selected")
             return false
         }
-        wxTableRow.#selectedRows.add(tr)
+        WdxTableRow.#selectedRows.add(tr)
         tr.classList.add("row-selected")
         return true
     }
@@ -95,7 +95,7 @@ export default class wxTableRow {
      * cmd: "left" | "center" | "right" | "justify"
      */
     static align(cmd, tr = null) {
-        tr = tr ?? wxTableRow.#activeRow
+        tr = tr ?? WdxTableRow.#activeRow
         if (!tr) return false
 
         const val =
@@ -114,7 +114,7 @@ export default class wxTableRow {
      * Aplica border nas células da linha.
      */
     static applyBorder(widthPx, color, tr = null) {
-        tr = tr ?? wxTableRow.#activeRow
+        tr = tr ?? WdxTableRow.#activeRow
         if (!tr) return false
 
         const style = widthPx === "0px" ? "none" : "solid"
@@ -127,20 +127,20 @@ export default class wxTableRow {
     }
 
     /**
-     * Ativa uma linha e sincroniza caret com wxRange.range (na 1ª célula, se possível).
+     * Ativa uma linha e sincroniza caret com SysRange.range (na 1ª célula, se possível).
      */
     static #setActive(tr) {
-        if (wxTableRow.#activeRow === tr) return
+        if (WdxTableRow.#activeRow === tr) return
 
-        if (wxTableRow.#activeRow) wxTableRow.#activeRow.classList.remove("row-active")
-        wxTableRow.#activeRow = tr
+        if (WdxTableRow.#activeRow) WdxTableRow.#activeRow.classList.remove("row-active")
+        WdxTableRow.#activeRow = tr
         tr.classList.add("row-active")
 
         // Opcional: se você quiser que ativar linha mova caret para 1ª célula
         const cell = tr.cells?.[0]
         if (cell) {
             // garante que o range fique dentro do escopo atual
-            wxSection.getRoot()?.focus({ preventScroll: true })
+            WdxSection.getRoot()?.focus({ preventScroll: true })
 
             const r = document.createRange()
             r.selectNodeContents(cell)
@@ -149,7 +149,7 @@ export default class wxTableRow {
             const sel = window.getSelection()
             sel?.removeAllRanges()
             sel?.addRange(r)
-            wxRange.saveSelection()
+            SysRange.saveSelection()
         }
     }
 }

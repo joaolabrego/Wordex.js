@@ -1,11 +1,11 @@
 "use strict"
 
-import wxRange from "./wxRange.mjs"
-import wxSection from "./wxSection.mjs"
+import SysRange from "./SysRange.mjs"
+import WdxSection from "./WdxSection.mjs"
 
 /** @typedef {import("./wdxTypes.mjs").wdxItem} wdxItem */
 
-export default class wxConfig {
+export default class Config {
   static K_OK = "✔ "
   static K_INSERT_MODE = "INS"
   static K_OVERWRITE_MODE = "OVR"
@@ -14,24 +14,26 @@ export default class wxConfig {
   static K_LANDSCAPE = "landscape"
   static K_PORTRAIT = "portrait"
   static K_DEFAULT_COLOR = "#000000"
-
+  static K_FOCUS_INDICATOR = "wrdFocused"
+  static K_KIND_INDICATOR = "wrdKind"
+  static K_RULE_INDICATOR = "wrdRule"
 
   static paperFormatList = Object.freeze([
     // Genérico
     { value: "", text: "Folha" },
 
     // ISO 216 — Série A
-    { value: "A0", text: "A0", width: "841mm", height: "1189mm" },
-    { value: "A1", text: "A1", width: "594mm", height: "841mm" },
-    { value: "A2", text: "A2", width: "420mm", height: "594mm" },
-    { value: "A3", text: "A3", width: "297mm", height: "420mm" },
-    { value: "A4", text: "A4", width: "210mm", height: "297mm", selected: true },
-    { value: "A5", text: "A5", width: "148mm", height: "210mm" },
-    { value: "A6", text: "A6", width: "105mm", height: "148mm" },
-    { value: "A7", text: "A7", width: "74mm", height: "105mm" },
-    { value: "A8", text: "A8", width: "52mm", height: "74mm" },
-    { value: "A9", text: "A9", width: "37mm", height: "52mm" },
-    { value: "A10", text: "A10", width: "26mm", height: "37mm" },
+    { value: "A0", text: "A0", width: "841mm", height: "1189mm", minHeightEdges: "5mm", maxHeightEdges: "100mm" },
+    { value: "A1", text: "A1", width: "594mm", height: "841mm", minHeightEdges: "5mm", maxHeightEdges: "100mm" },
+    { value: "A2", text: "A2", width: "420mm", height: "594mm", minHeightEdges: "5mm", maxHeightEdges: "100mm" },
+    { value: "A3", text: "A3", width: "297mm", height: "420mm", minHeightEdges: "5mm", maxHeightEdges: "50mm" },
+    { value: "A4", text: "A4", width: "210mm", height: "297mm", minHeightEdges: "5mm", maxHeightEdges: "50mm", selected: true },
+    { value: "A5", text: "A5", width: "148mm", height: "210mm", minHeightEdges: "5mm", maxHeightEdges: "50mm" },
+    { value: "A6", text: "A6", width: "105mm", height: "148mm", minHeightEdges: "5mm", maxHeightEdges: "20mm" },
+    { value: "A7", text: "A7", width: "74mm", height: "105mm", minHeightEdges: "5mm", maxHeightEdges: "20mm" },
+    { value: "A8", text: "A8", width: "52mm", height: "74mm", minHeightEdges: "5mm", maxHeightEdges: "10mm" },
+    { value: "A9", text: "A9", width: "37mm", height: "52mm", minHeightEdges: "5mm", maxHeightEdges: "10mm" },
+    { value: "A10", text: "A10", width: "26mm", height: "37mm", minHeightEdges: "5mm", maxHeightEdges: "10mm" },
 
     // ISO 216 — Série B
     { value: "B0", text: "B0", width: "1000mm", height: "1414mm" },
@@ -78,7 +80,7 @@ export default class wxConfig {
     { value: "", text: "Fonte" },
 
     // Sans-serif (UI / leitura)
-    { value: '"Segoe UI", sans-serif', text: "Segoe UI", selected: true },
+    { value: '"Segoe UI", sans-serif', text: "Segoe UI" },
     { value: "Arial, sans-serif", text: "Arial" },
     { value: "Calibri, sans-serif", text: "Calibri" },
     { value: "Tahoma, sans-serif", text: "Tahoma" },
@@ -95,7 +97,7 @@ export default class wxConfig {
 
     // Monospace (código)
     { value: '"Consolas", monospace', text: "Consolas" },
-    { value: '"Courier New", monospace', text: "Courier New" },
+    { value: '"Courier New", monospace', text: "Courier New", selected: true },
     { value: '"Lucida Console", monospace', text: "Lucida Console" },
 
     // “Clássicas Windows”
@@ -142,8 +144,8 @@ export default class wxConfig {
   
   static pageOrientationList = Object.freeze([
     { value: "", text: "Orientação" },
-    { value: wxConfig.K_PORTRAIT, text: "Retrato", selected: true },
-    { value: wxConfig.K_LANDSCAPE, text: "Paisagem" },
+    { value: Config.K_PORTRAIT, text: "Retrato", selected: true },
+    { value: Config.K_LANDSCAPE, text: "Paisagem" },
   ])
   
   static fontStyleList = Object.freeze([
@@ -176,101 +178,16 @@ export default class wxConfig {
     { value: "right", text: "Direita" },
     { value: "justify", text: "Justificado" },
   ])
-  
-  static ScriptPage = `
-        :root { --margin: 20mm; }
-
-        .page {
-          margin: var(--margin);
-          display: flex;
-          flex-direction: column;
-          margin: 60px auto 0;
-          height: calc(100vh - calc(var(--margin) * 2));
-        }
-
-        .header {
-          height: 20mm;
-          flex: 0 0 auto;
-        }
-
-        .body {
-          flex: 1 1 auto;
-          min-height: 0;
-          overflow-y: auto;
-        }
-
-        .footer {
-          flex: 0 0 auto;
-          height: 15mm;
-        }
-
-        /* layout do documento */
-
-        img.img-left {
-          float: left;
-          margin: 4px 8px 4px 0;
-        }
-
-        img.img-right {
-          float: right;
-          margin: 4px 0 4px 8px;
-        }
-
-        img.img-inline {
-          float: none;
-          display: inline-block;
-          margin: 4px auto;
-        }
-    `
-  
-  static ScriptPageUI = `
-        .page {
-          background: #fff;
-        }
-
-        .header, footer {
-          border-bottom: 1px dashed #555;
-          overflow: hidden;
-          background: #AAA;
-        }
-
-        .workspace {
-          background: #CCC;
-          padding: 10px;
-        }
-
-        .editable {
-          outline: none;
-          min-height: 24px;
-        }
-
-        .editable:focus {
-          box-shadow: 0 0 0 3px #0AEC0A inset;
-        }
-
-        /* feedback visual de seleção */
-
-        img.img-selected {
-          outline: 2px solid #0AEC0A;
-          outline-offset: 2px;
-        }
-
-        .row-selected td, .col-selected {
-          outline: 2px solid #0AEC0A;
-          outline-offset: -2px;
-        }
-
-        /* estados/auxiliares de edição */
-
-        .insert-mode {
-          padding: 0 5px;
-        }
-    `
 
   static ScriptToolbar = `
       html, body { margin: 0; padding: 0; }
-      body { background-color: #555; }
-
+      body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        background-color: #555;
+      }
+     
       .control { margin: 5px; }
 
       .toolbar {
@@ -311,26 +228,104 @@ export default class wxConfig {
         max-width: 40px;
       }
     `  
+  
+  static Script = `
+        :root { --margin: 20mm; }
+
+        .document {
+          background: #fff;
+          margin: var(--margin);
+          display: flex;
+          flex-direction: column;
+          margin: 60px auto 0;
+          height: calc(100vh - calc(var(--margin) * 2));
+        }
+
+        .header {
+          height: 20mm;
+          flex: 0 0 auto;
+          border-bottom: 1px dashed #555;
+          overflow: hidden;
+          background: #AAA;
+        }
+
+        .footer {
+          flex: 0 0 auto;
+          height: 15mm;
+          border-bottom: 1px dashed #555;
+          overflow: hidden;
+          background: #AAA;
+
+        }
+
+        img.img-left {
+          float: left;
+          margin: 4px 8px 4px 0;
+        }
+
+        img.img-right {
+          float: right;
+          margin: 4px 0 4px 8px;
+        }
+
+        img.img-inline {
+          float: none;
+          display: inline-block;
+          margin: 4px auto;
+        }
+
+
+        .workspace {
+          background: #CCC;
+          padding: 10px;
+        }
+
+        .editable {
+          outline: none;
+          min-height: 24px;
+        }
+
+        .editable:focus {
+          box-shadow: 0 0 0 3px #0AEC0A inset;
+        }
+
+        img.img-selected {
+          outline: 2px solid #0AEC0A;
+          outline-offset: 2px;
+        }
+
+        .row-selected td, .col-selected {
+          outline: 2px solid #0AEC0A;
+          outline-offset: -2px;
+        }
+
+        .insert-mode {
+          padding: 0 5px;
+        }
+    `
+  
   static deleteArrayItem(array, value) {
     const index = array.indexOf(value)
-    if (index !== -1) array.splice(index, 1)
+    if (index > -1)
+      array.splice(index, 1)
   }
 
   static exec(cmd, value = null) {
-    if (!wxRange.range) return false
+    if (!SysRange.range) return false
 
     const sel = window.getSelection()
     if (!sel) return false
 
     sel.removeAllRanges()
-    sel.addRange(wxRange.range)
+    sel.addRange(SysRange.range)
 
-    wxSection.getRoot()?.focus({ preventScroll: true })
+    WdxSection.getRoot()?.focus({ preventScroll: true })
 
     if (value !== null && value !== undefined) document.execCommand(cmd, false, value)
     else document.execCommand(cmd, false)
 
-    wxRange.saveSelection()
+    SysRange.saveSelection()
     return true
   }
+
 }

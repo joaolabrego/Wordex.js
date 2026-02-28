@@ -1,19 +1,19 @@
 "use strict"
 
-import wxLayout from "./wxLayout.mjs"
-import wxSection from "./wxSection.mjs"
-import wxRange from "./wxRange.mjs"
-import wxGrid from "./wxTable.mjs"
+import ActLayout from "./ActLayout.mjs"
+import WdxSection from "./WdxSection.mjs"
+import SysRange from "./SysRange.mjs"
+import wxGrid from "./WdxTable.mjs"
 
-export default class wxMovement {
+export default class ActMovement {
     // =========================================================
     // Public API
     // =========================================================
 
-    static leftWord(el) { return wxMovement.#moveByWord(el, -1) }
-    static rightWord(el) { return wxMovement.#moveByWord(el, +1) }
-    static upParagraph(el) { return wxMovement.#moveParagraph(el, -1) }
-    static downParagraph(el) { return wxMovement.#moveParagraph(el, +1) }
+    static leftWord(el) { return ActMovement.#moveByWord(el, -1) }
+    static rightWord(el) { return ActMovement.#moveByWord(el, +1) }
+    static upParagraph(el) { return ActMovement.#moveParagraph(el, -1) }
+    static downParagraph(el) { return ActMovement.#moveParagraph(el, +1) }
 
     // =========================================================
     // Core: move by word
@@ -22,28 +22,28 @@ export default class wxMovement {
     static #moveByWord(el, dir) {
         if (!el) return false
 
-        const rootSection = wxSection.getRoot()
+        const rootSection = WdxSection.getRoot()
         if (!rootSection) return false
 
-        const p = wxMovement.#getParagraph(el, rootSection)
+        const p = ActMovement.#getParagraph(el, rootSection)
         if (!p) return false
 
-        const segs = wxMovement.#getTextSegments(p)
+        const segs = ActMovement.#getTextSegments(p)
         const fullText = segs.map(s => s.node.nodeValue ?? "").join("")
         if (!fullText.length) return false
 
-        const pos = wxMovement.#getGlobalOffsetBeforeElement(segs, el)
+        const pos = ActMovement.#getGlobalOffsetBeforeElement(segs, el)
 
         const target = dir < 0
-            ? wxMovement.#findPrevWordStart(fullText, pos)
-            : wxMovement.#findNextWordEnd(fullText, pos)
+            ? ActMovement.#findPrevWordStart(fullText, pos)
+            : ActMovement.#findNextWordEnd(fullText, pos)
 
         if (target === pos) return false
 
-        if (!wxMovement.#insertNodeAtGlobalOffset(p, segs, target, el)) return false
+        if (!ActMovement.#insertNodeAtGlobalOffset(p, segs, target, el)) return false
 
-        wxMovement.#placeCaretAfter(el)
-        wxRange.saveSelection()
+        ActMovement.#placeCaretAfter(el)
+        SysRange.saveSelection()
         return true
     }
 
@@ -54,10 +54,10 @@ export default class wxMovement {
     static #moveParagraph(el, dir) {
         if (!el) return false
 
-        const rootSection = wxSection.getRoot()
+        const rootSection = WdxSection.getRoot()
         if (!rootSection) return false
 
-        const p = wxMovement.#getParagraph(el, rootSection)
+        const p = ActMovement.#getParagraph(el, rootSection)
         if (!p) return false
 
         const target = dir < 0 ? p.previousElementSibling : p.nextElementSibling
@@ -65,8 +65,8 @@ export default class wxMovement {
 
         target.appendChild(el)
 
-        wxMovement.#placeCaretAfter(el)
-        wxRange.saveSelection()
+        ActMovement.#placeCaretAfter(el)
+        SysRange.saveSelection()
         return true
     }
 
@@ -114,17 +114,17 @@ export default class wxMovement {
 
     static #findPrevWordStart(text, pos) {
         let i = Math.min(pos - 1, text.length - 1)
-        while (i >= 0 && !wxMovement.#isWordChar(text[i])) i--
+        while (i >= 0 && !ActMovement.#isWordChar(text[i])) i--
         if (i < 0) return 0
-        while (i >= 0 && wxMovement.#isWordChar(text[i])) i--
+        while (i >= 0 && ActMovement.#isWordChar(text[i])) i--
         return i + 1
     }
 
     static #findNextWordEnd(text, pos) {
         let i = Math.max(0, pos)
-        while (i < text.length && !wxMovement.#isWordChar(text[i])) i++
+        while (i < text.length && !ActMovement.#isWordChar(text[i])) i++
         if (i >= text.length) return text.length
-        while (i < text.length && wxMovement.#isWordChar(text[i])) i++
+        while (i < text.length && ActMovement.#isWordChar(text[i])) i++
         return i
     }
 
@@ -176,17 +176,17 @@ export default class wxMovement {
         sel?.addRange(r)
     }
 
-    static moveLeftWord(instance) { return wxMovement.leftWord(instance) }
-    static moveRightWord(instance) { return wxMovement.rightWord(instance) }
-    static moveParagraphUp(instance) { return wxMovement.upParagraph(instance) }
-    static moveParagraphDown(instance) { return wxMovement.downParagraph(instance) }
+    static moveLeftWord(instance) { return ActMovement.leftWord(instance) }
+    static moveRightWord(instance) { return ActMovement.rightWord(instance) }
+    static moveParagraphUp(instance) { return ActMovement.upParagraph(instance) }
+    static moveParagraphDown(instance) { return ActMovement.downParagraph(instance) }
 
     // alinhamento com wrap e sem “buraco” por margem
-    static alignLeft(instance) { return wxLayout.alignObject(instance, "left") }
-    static alignRight(instance) { return wxLayout.alignObject(instance, "right") }
-    static alignCenter(instance) { return wxLayout.alignObject(instance, "center") }
+    static alignLeft(instance) { return ActLayout.alignObject(instance, "left") }
+    static alignRight(instance) { return ActLayout.alignObject(instance, "right") }
+    static alignCenter(instance) { return ActLayout.alignObject(instance, "center") }
 
     // resize unificado
-    static increase(instance) { return wxLayout.increase(instance) }
-    static decrease(instance) { return wxLayout.decrease(instance) }
+    static increase(instance) { return ActLayout.increase(instance) }
+    static decrease(instance) { return ActLayout.decrease(instance) }
 }

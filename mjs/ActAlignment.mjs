@@ -1,12 +1,11 @@
 "use strict"
 
-import wxPicture from "./wxImage.mjs"
-import wxPage from "./wxPage.mjs"
-import wxRange from "./wxRange.mjs"
-import wxSection from "./wxSection.mjs"
-import wxGrid from "./wxTable.mjs"
+import wxPicture from "./WdxImage.mjs"
+import wxPage from "./WdxDocument.mjs"
+import SysRange from "./SysRange.mjs"
+import wxGrid from "./WdxTable.mjs"
 
-export default class wxAlignment {
+export default class ActAlignment {
 
     /** @param {"left"|"center"|"right"|"justify"} dir */
     static align(dir) {
@@ -32,13 +31,13 @@ export default class wxAlignment {
 
         // 3) parágrafo/texto: execCommand
         if (dir === "left")
-            wxRange.alignLeft()
+            SysRange.alignLeft()
         else if (dir === "right")
-            wxRange.alignRight()
+            SysRange.alignRight()
         else if (dir === "center")
-            wxRange.alignCenter()
+            SysRange.alignCenter()
         else
-            wxRange.justify()
+            SysRange.justify()
         
         return true
     }
