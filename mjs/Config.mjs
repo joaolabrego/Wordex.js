@@ -179,7 +179,9 @@ export default class Config {
     { value: "justify", text: "Justificado" },
   ])
 
-  static ScriptToolbar = `
+  static Script = `
+      :root { --margin: 20mm; }
+
       html, body { margin: 0; padding: 0; }
       body {
         flex: 1 1 auto;
@@ -187,7 +189,7 @@ export default class Config {
         overflow-y: auto;
         background-color: #555;
       }
-     
+
       .control { margin: 5px; }
 
       .toolbar {
@@ -227,105 +229,76 @@ export default class Config {
         min-width: 30px;
         max-width: 40px;
       }
-    `  
-  
-  static Script = `
-        :root { --margin: 20mm; }
 
-        .document {
-          background: #fff;
-          margin: var(--margin);
-          display: flex;
-          flex-direction: column;
-          margin: 60px auto 0;
-          height: calc(100vh - calc(var(--margin) * 2));
-        }
+      .document {
+        background: #fff;
+        margin: var(--margin);
+        display: flex;
+        flex-direction: column;
+        margin: 60px auto 0;
+        height: calc(100vh - calc(var(--margin) * 2));
+      }
 
-        .header {
-          height: 20mm;
-          flex: 0 0 auto;
-          border-bottom: 1px dashed #555;
-          overflow: hidden;
-          background: #AAA;
-        }
+      .header {
+        height: 20mm;
+        flex: 0 0 auto;
+        border-bottom: 1px dashed #555;
+        overflow: hidden;
+        background: #AAA;
+      }
 
-        .footer {
-          flex: 0 0 auto;
-          height: 15mm;
-          border-bottom: 1px dashed #555;
-          overflow: hidden;
-          background: #AAA;
+      .footer {
+        flex: 0 0 auto;
+        height: 15mm;
+        border-bottom: 1px dashed #555;
+        overflow: hidden;
+        background: #AAA;
 
-        }
+      }
 
-        img.img-left {
-          float: left;
-          margin: 4px 8px 4px 0;
-        }
+      img.img-left {
+        float: left;
+        margin: 4px 8px 4px 0;
+      }
 
-        img.img-right {
-          float: right;
-          margin: 4px 0 4px 8px;
-        }
+      img.img-right {
+        float: right;
+        margin: 4px 0 4px 8px;
+      }
 
-        img.img-inline {
-          float: none;
-          display: inline-block;
-          margin: 4px auto;
-        }
+      img.img-inline {
+        float: none;
+        display: inline-block;
+        margin: 4px auto;
+      }
 
 
-        .workspace {
-          background: #CCC;
-          padding: 10px;
-        }
+      .workspace {
+        background: #CCC;
+        padding: 10px;
+      }
 
-        .editable {
-          outline: none;
-          min-height: 24px;
-        }
+      .editable {
+        outline: none;
+        min-height: 24px;
+      }
 
-        .editable:focus {
-          box-shadow: 0 0 0 3px #0AEC0A inset;
-        }
+      .editable:focus {
+        box-shadow: 0 0 0 3px #0AEC0A inset;
+      }
 
-        img.img-selected {
-          outline: 2px solid #0AEC0A;
-          outline-offset: 2px;
-        }
+      img.img-selected {
+        outline: 2px solid #0AEC0A;
+        outline-offset: 2px;
+      }
 
-        .row-selected td, .col-selected {
-          outline: 2px solid #0AEC0A;
-          outline-offset: -2px;
-        }
+      .row-selected td, .col-selected {
+        outline: 2px solid #0AEC0A;
+        outline-offset: -2px;
+      }
 
-        .insert-mode {
-          padding: 0 5px;
-        }
+      .insert-mode {
+        padding: 0 5px;
+      }
     `
-  
-  static deleteArrayItem(array, value) {
-    const index = array.indexOf(value)
-    if (index > -1)
-      array.splice(index, 1)
-  }
-
-  static exec(cmd, value = null) {
-    if (!SysRange.range) return false
-
-    const sel = window.getSelection()
-    if (!sel) return false
-
-    sel.removeAllRanges()
-    sel.addRange(SysRange.range)
-
-    WdxSection.getRoot()?.focus({ preventScroll: true })
-
-    if (value !== null && value !== undefined) document.execCommand(cmd, false, value)
-    else document.execCommand(cmd, false)
-
-    SysRange.saveSelection()
-    return true
-  }
-
 }

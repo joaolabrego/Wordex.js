@@ -8,9 +8,9 @@ import WdxTemplate from "./WdxTemplate.mjs"
 
 /**
  * Hungarian Notation:
- * Identificadores prefixados com wx referem-se a objetos das classes do Wordex.
- * Identificadores prefixados com wdx referem-se a objetos HTML.
- * Identificadores prefixados com wrd referem-se aos demais objetos que não são Wordex e nem HTML.
+ * Propriedades/métodos prefixados com wx referem-se a objetos de classes prefixadas com Wdx.
+ * Propriedades/métodos prefixados com wd referem-se a elementos HTML.
+ * Propriedades/métodos prefixados com wr referem-se a objetos de classes prefixadas com Sys ou outras não classificadas aqui.
  */
 export default class Wordex {
     #SysBody = null

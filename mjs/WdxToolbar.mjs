@@ -28,10 +28,6 @@ export default class WdxToolbar {
         this.#template = template
         this.#toolbar = document.createElement("div")
 
-        const style = document.createElement("style")
-        style.textContent = Config.ScriptToolbar
-        this.#toolbar.appendChild(style)
-
         this.#toolbar.classList.add("toolbar")
 
         // família da fonte

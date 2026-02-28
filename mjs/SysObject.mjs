@@ -7,7 +7,7 @@ import SysListener from "./SysListener.mjs"
 export default class SysObject {
     #wxObject = null
     #wxLastFocused = null
-    #wrdEventListeners = []
+    #wrEventListeners = []
 
     /**
      * Construtor da classe SysObject.
@@ -94,7 +94,7 @@ export default class SysObject {
      * @returns {void}
      */
     appendEventListener(wrdType, wrdHandler) {
-        this.#wrdEventListeners.push(new SysListener(this.wxObject, wrdType, wrdHandler))
+        this.#wrEventListeners.push(new SysListener(this.wxObject, wrdType, wrdHandler))
         this.element.addEventListener(wrdType, wrdHandler)
     }
     /**
@@ -102,7 +102,7 @@ export default class SysObject {
      * @returns {void}
      */
     clearEventListeners() {
-        this.#wrdEventListeners.forEach(listener => this.element.removeEventListener(listener.wrdType, listener.wrdHandler))
-        this.#wrdEventListeners.length = 0
+        this.#wrEventListeners.forEach(listener => this.element.removeEventListener(listener.wrdType, listener.wrdHandler))
+        this.#wrEventListeners.length = 0
     }
 }

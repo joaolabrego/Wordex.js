@@ -8,22 +8,18 @@ export default class SysBody {
     #wdxBody = null
     #wdxHead = null
     constructor() {
-        this.#wdxDocument = document
-        this.#wdxBody = document.body
-        this.#wdxHead = document.head
-        
         const style = document.createElement("style")
         style.textContent = Config.Script
-        this.#wdxHead.appendChild(style);
+        document.head.appendChild(style);
     }
     get owner() {
-        return this.#wdxDocument
+        return document
     }
     /**
      * @returns {HTMLBodyElement}
      */
     get element() {
-        return this.#wdxBody
+        return document.body
     }
     /**
      * Adiciona uma div ao body.

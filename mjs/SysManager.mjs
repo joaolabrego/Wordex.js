@@ -8,10 +8,7 @@ import Config from "./Config.mjs"
 /** @typedef {import("./Typedefs.mjs").wxWordex} wxWordex */
 
 export default class SysManager {
-    /** @type {SysObject[]} */
     #wxObjects = []
-
-    /** @type {WdxTemplate} */
     #WdxTemplate = null
  
     /**
