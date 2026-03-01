@@ -1,7 +1,7 @@
 "use strict"
 
 import wxPicture from "./WdxImage.mjs"
-import wxPage from "./WdxDocument.mjs"
+import wxPage from "./WrdDocument.mjs"
 import SysRange from "./SysRange.mjs"
 import wxGrid from "./WdxTable.mjs"
 

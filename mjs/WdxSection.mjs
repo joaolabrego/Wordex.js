@@ -1,28 +1,28 @@
 'use strict'
 
 import ActEdit from './ActEdit.mjs'
-import wxPage from './WdxDocument.mjs'
+import SysObject from './SysObject.mjs'
 import WdxParagraph from './WdxParagraph.mjs'
 
 export default class WdxSection {
     static #rootSection
 
-    #wxPage
+    #wxDocument
     #wdxSection
     #paragraphs = []
     
-    constructor(WdxDocument, role, textContent = "") {
-        this.#wxPage = WdxDocument
-
+    constructor(wxDocument) {
+        this.#wxDocument = wxDocument
+/*
         this.#wdxSection = document.createElement("div")
         this.#wdxSection.tabIndex = -1
         this.#wdxSection.classList.add("editable", "workspace", role)
         this.#wdxSection.contentEditable = "true"
         
-        this.#wxPage.owner.pushAttribute(this.#wdxSection, "wrdKind", "section")
-        this.#wxPage.owner.pushAttribute(this.#wdxSection, "wrdRole", role)
-        this.#wxPage.owner.pushEventListener(this.#wdxSection, "keydown", (e) => ActEdit.onKeyDown(e))
-        this.#wxPage.owner.pushEventListener(this.#wdxSection, "focus", () => WdxSection.#rootSection = this.#wdxSection)
+        this.#wxDocument.owner.pushAttribute(this.#wdxSection, "wrdKind", "section")
+        this.#wxDocument.owner.pushAttribute(this.#wdxSection, "wrdRole", role)
+        this.#wxDocument.owner.pushEventListener(this.#wdxSection, "keydown", (e) => ActEdit.onKeyDown(e))
+        this.#wxDocument.owner.pushEventListener(this.#wdxSection, "focus", () => WdxSection.#rootSection = this.#wdxSection)
 
         this.addParagraph()
         if (textContent.trim())
@@ -30,10 +30,11 @@ export default class WdxSection {
         else
             this.#paragraphs[0].element.appendChild(document.createElement("br"))
         this.#wdxSection.append(this.#paragraphs[0].element)
+        */
     }
 
     get owner() {
-        return this.#wxPage
+        return this.#wxDocument
     }
 
     get element() {
@@ -105,6 +106,11 @@ export default class WdxSection {
         if (length)
             return this.#paragraphs[length - 1]
     }
+
+    get htmlTag() {
+        return "div"
+    }
+
 
     static getRoot() {
         return WdxSection.#rootSection

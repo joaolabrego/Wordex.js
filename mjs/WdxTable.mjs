@@ -3,7 +3,6 @@
 import ActMovement from "./ActMovement.mjs"
 import SysRange from "./SysRange.mjs"
 import ActLayout from "./ActLayout.mjs"
-import wxPage from "./WdxDocument.mjs"
 
 export default class WdxTable {
     #page

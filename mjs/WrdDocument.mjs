@@ -1,6 +1,5 @@
 "use strict"
 
-import ActEdit from "./ActEdit.mjs"
 import wxPicture from "./WdxImage.mjs"
 import WdxParagraph from "./WdxParagraph.mjs"
 import wxGrid from "./WdxTable.mjs"
@@ -9,19 +8,17 @@ import WdxTableRow from "./WdxTableRow.mjs"
 import WdxTableCol from "./WdxTableCol.mjs"
 import WdxSection from "./WdxSection.mjs"
 import SysRange from "./SysRange.mjs"
-import Config from "./Config.mjs"
-import SysClass from "./SysClass.mjs"
+import SysObject from "./SysObject.mjs"
 
-export default class WdxDocument {
-    #WdxTemplate = null
-    #wdxDocument = null
-    #wxHeader = null
-    #SysBody = null
-    #wxFooter = null
+export default class WrdDocument {
+    #wxTemplate = null
+    #objHeader = null
+    #objBody = null
+    #objFooter = null
     #wxFocusedSection = null
 
     constructor(template) {
-        this.#WdxTemplate = template
+        this.#wxTemplate = template
 
         /*
         const header = this.wordex.objectNew(this, WdxSection,
@@ -39,24 +36,35 @@ export default class WdxDocument {
                 ]
               })
         */
+        const header = new SysObject(this, WdxSection)
         
-        const header = new SysClass(this, WdxSection)
-        
+        this.#objHeader = new SysObject(this, WdxSection)
+        this.#objHeader.element.textContent = "Cabeçalho: clique para editar"
+        this.#objHeader.appendClassName("editable")
+        this.#objHeader.appendClassName("workspace")
+        this.#objHeader.appendClassName("header")
+        this.#objHeader.contentEditable = true
+        this.#objHeader.wrFocable = true
+        this.#wxTemplate.document.appendElement(this.#objHeader.element)
 
+        //this.wordex.pushObject(this.#wxHeader)
 
-        this.#wxHeader = new WdxSection(this, "header", "Cabeçalho: clique para editar")
-        this.#wdxDocument.appendChild(this.#wxHeader.element)
-        this.wordex.pushObject(this.#wxHeader)
+        this.#objBody = new SysObject(this, WdxSection)
+        this.#objBody.element.textContent = "Corpo do documento: clique para editar"
+        this.#objBody.appendClassName("editable")
+        this.#objBody.appendClassName("workspace")
+        this.#objBody.appendClassName("body")
+        this.#objBody.contentEditable = true
+        this.#wxTemplate.document.appendElement(this.#objBody.element)
 
-        this.#SysBody = new WdxSection(this, "body", "Corpo do documento: clique para editar")
-        this.wordex.pushObject(this.#SysBody)
-        this.#wdxDocument.appendChild(this.#SysBody.element)
-
-
-        this.#wxFooter = new WdxSection(this, "footer", "Rodapé: clique para editar")
-        this.wordex.pushObject(this.#wxFooter)
-        this.#wdxDocument.appendChild(this.#wxFooter.element)
-        
+        this.#objFooter = new SysObject(this, WdxSection)
+        this.#objFooter.element.textContent = "Rodapé: clique para editar"
+        this.#objFooter.appendClassName("editable")
+        this.#objFooter.appendClassName("workspace")
+        this.#objFooter.appendClassName("footer")
+        this.#objFooter.contentEditable = true
+        this.#wxTemplate.document.appendElement(this.#objFooter.element)
+/*
         WdxSection.setRoot(this.#SysBody.element)
 
         // Registra handlers de clique para parágrafo, tabela e imagem em cada seção editável
@@ -65,44 +73,38 @@ export default class WdxDocument {
             wxGrid.attach(section.element)
             wxPicture.attach(section.element)
         }
+*/        
     }
+
     /**
-     * Retorna objeto da classe WdxTemplate.
+     * Retorna objeto da classe WrdTemplate.
      * @returns {HTMLElement}
      */
     get owner() {
-        return this.#WdxTemplate
+        return this.#wxTemplate
     }
     /**
-     * Retorna objeto HTML da classe WdxDocument.
+     * Retorna objeto HTML da classe WrdDocument.
      * @returns {HTMLElement}
      */
-    get element() {
-        return this.#wdxDocument
-    }
-
     get wordex() {
-        this.#WdxTemplate.wordex
+        this.#wxTemplate.wordex
     }
 
     get htmlTag() {
         return "div"
     }
 
-    get headerElment() {
-        return this.#wxHeader.element
+    get header() {
+        return this.#objHeader
     }
 
-    get bodyElement() {
-        return this.#SysBody.element
+    get body() {
+        return this.#objBody
     }
 
-    get footerElement() {
-        return this.#wxFooter.element
-    }
-
-    get focusedSection() {
-        return this.#wxFocusedSection
+    get footer() {
+        return this.#objFooter
     }
 
     setColor(hex) {
@@ -116,7 +118,7 @@ export default class WdxDocument {
             return SysRange.setFontColor(hex)
         }
 
-        const paragraph = WdxDocument.getParagraphTarget()
+        const paragraph = WrdDocument.getParagraphTarget()
         if (paragraph) {
             paragraph.style.color = hex
             return true
@@ -147,20 +149,20 @@ export default class WdxDocument {
     }
 
     static #getActiveTable() {
-        const cell = WdxDocument.#callIfExists(WdxTableCell, "getActive")
+        const cell = WrdDocument.#callIfExists(WdxTableCell, "getActive")
         if (cell) return /** @type {HTMLTableElement|null} */ (cell.closest("table"))
 
-        const tr = WdxDocument.#callIfExists(WdxTableRow, "getActive")
+        const tr = WrdDocument.#callIfExists(WdxTableRow, "getActive")
         if (tr) return /** @type {HTMLTableElement|null} */ (tr.closest("table"))
 
-        const col = WdxDocument.#callIfExists(WdxTableCol, "getActive")
+        const col = WrdDocument.#callIfExists(WdxTableCol, "getActive")
         if (col?.table) return col.table
 
         return null
     }
 
     static getParagraphTarget() {
-        const fp = WdxDocument.#callIfExists(WdxParagraph, "getFocused")
+        const fp = WrdDocument.#callIfExists(WdxParagraph, "getFocused")
         if (fp) return fp
         SysRange.restoreRange(SysRange.range)
 
@@ -170,14 +172,14 @@ export default class WdxDocument {
     // Resolver (Cell -> Row -> Col -> wxPicture -> Text -> WdxParagraph)
     // =========================================================
     static selectedTarget() {
-        if (WdxDocument.#callIfExists(WdxTableCell, "hasSelection") || WdxDocument.#callIfExists(WdxTableCell, "hasActive"))
+        if (WrdDocument.#callIfExists(WdxTableCell, "hasSelection") || WrdDocument.#callIfExists(WdxTableCell, "hasActive"))
             return { kind: "cell", obj: WdxTableCell }
 
-        if (WdxDocument.#callIfExists(WdxTableRow, "hasSelection") || WdxDocument.#callIfExists(WdxTableRow, "hasActive"))
+        if (WrdDocument.#callIfExists(WdxTableRow, "hasSelection") || WrdDocument.#callIfExists(WdxTableRow, "hasActive"))
             return { kind: "row", obj: WdxTableRow }
 
-        const table = WdxDocument.#getActiveTable()
-        if ((table && WdxDocument.#callIfExists(WdxTableCol, "hasSelection", table)) || WdxDocument.#callIfExists(WdxTableCol, "hasActive"))
+        const table = WrdDocument.#getActiveTable()
+        if ((table && WrdDocument.#callIfExists(WdxTableCol, "hasSelection", table)) || WrdDocument.#callIfExists(WdxTableCol, "hasActive"))
             return { kind: "col", obj: WdxTableCol }
 
         if (wxPicture.hasFocus()) return { kind: "image", obj: wxPicture }
@@ -190,7 +192,7 @@ export default class WdxDocument {
     }
 
     // =========================================================
-    // WdxToolbar verbs
+    // WrdToolbar verbs
     // =========================================================
 
     static border(widthPx, color) {
@@ -199,7 +201,7 @@ export default class WdxDocument {
         if (wxGrid.applyBorder(widthPx, color)) return true
         if (wxPicture.applyBorder(widthPx, color)) return true
 
-        const p = WdxDocument.getParagraphTarget()
+        const p = WrdDocument.getParagraphTarget()
         if (!p) return false
         p.style.borderStyle = widthPx === "0px" ? "none" : "solid"
         p.style.borderWidth = widthPx
@@ -214,7 +216,7 @@ export default class WdxDocument {
         if (wxGrid.applyBorderRadius(radiusPx)) return true
         if (wxPicture.applyBorderRadius(radiusPx)) return true
 
-        const p = WdxDocument.getParagraphTarget()
+        const p = WrdDocument.getParagraphTarget()
         if (!p)
             return false
         p.style.borderRadius = radiusPx
@@ -223,7 +225,7 @@ export default class WdxDocument {
     }
 
     static increase() {
-        const t = WdxDocument.selectedTarget()
+        const t = WrdDocument.selectedTarget()
         if (t.kind === "image") {
             const img = wxPicture.getFocused()
             if (img)
@@ -236,11 +238,11 @@ export default class WdxDocument {
                 wxGrid.increase(table);
             return true
         }
-        return !WdxDocument.#callIfExists(WdxParagraph, "increase")
+        return !WrdDocument.#callIfExists(WdxParagraph, "increase")
     }
 
     static decrease() {
-        const t = WdxDocument.selectedTarget()
+        const t = WrdDocument.selectedTarget()
         if (t.kind === "image") {
             const img = wxPicture.getFocused();
             if (img)
@@ -253,11 +255,11 @@ export default class WdxDocument {
                 wxGrid.decrease(table);
             return true
         }
-        return !WdxDocument.#callIfExists(WdxParagraph, "decrease")
+        return !WrdDocument.#callIfExists(WdxParagraph, "decrease")
     }
 
     static left() {
-        const t = WdxDocument.selectedTarget()
+        const t = WrdDocument.selectedTarget()
         if (t.kind === "image") {
             const img = wxPicture.getFocused();
             if (img)
@@ -270,27 +272,27 @@ export default class WdxDocument {
                 wxGrid.moveLeftWord(table);
             return true
         }
-        return !WdxDocument.#callIfExists(WdxParagraph, "left")
+        return !WrdDocument.#callIfExists(WdxParagraph, "left")
     }
 
     static right() {
-        const t = WdxDocument.selectedTarget()
+        const t = WrdDocument.selectedTarget()
         if (t.kind === "image") { const img = wxPicture.getFocused(); if (img) wxPicture.moveRightWord(img); return true }
         if (t.kind === "cell" || t.kind === "row" || t.kind === "col" || t.kind === "table") { const table = wxGrid.getFocused(); if (table) wxGrid.moveRightWord(table); return true }
-        return !WdxDocument.#callIfExists(WdxParagraph, "right")
+        return !WrdDocument.#callIfExists(WdxParagraph, "right")
     }
 
     static up() {
-        const t = WdxDocument.selectedTarget()
+        const t = WrdDocument.selectedTarget()
         if (t.kind === "image") { const img = wxPicture.getFocused(); if (img) wxPicture.moveUp(img); return true }
         if (t.kind === "cell" || t.kind === "row" || t.kind === "col" || t.kind === "table") { const table = wxGrid.getFocused(); if (table) wxGrid.moveUp(table); return true }
-        return !WdxDocument.#callIfExists(WdxParagraph, "up")
+        return !WrdDocument.#callIfExists(WdxParagraph, "up")
     }
 
     static down() {
-        const t = WdxDocument.selectedTarget()
+        const t = WrdDocument.selectedTarget()
         if (t.kind === "image") { const img = wxPicture.getFocused(); if (img) wxPicture.moveDown(img); return true }
         if (t.kind === "cell" || t.kind === "row" || t.kind === "col" || t.kind === "table") { const table = wxGrid.getFocused(); if (table) wxGrid.moveDown(table); return true }
-        return !WdxDocument.#callIfExists(WdxParagraph, "down")
+        return !WrdDocument.#callIfExists(WdxParagraph, "down")
     }
 }

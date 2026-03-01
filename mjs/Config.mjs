@@ -1,8 +1,5 @@
 "use strict"
 
-import SysRange from "./SysRange.mjs"
-import WdxSection from "./WdxSection.mjs"
-
 /** @typedef {import("./wdxTypes.mjs").wdxItem} wdxItem */
 
 export default class Config {
@@ -14,9 +11,9 @@ export default class Config {
   static K_LANDSCAPE = "landscape"
   static K_PORTRAIT = "portrait"
   static K_DEFAULT_COLOR = "#000000"
-  static K_FOCUS_INDICATOR = "wrdFocused"
-  static K_KIND_INDICATOR = "wrdKind"
-  static K_RULE_INDICATOR = "wrdRule"
+  static K_FOCUS_INDICATOR = "woFocused"
+  static K_KIND_INDICATOR = "woKind"
+  static K_RULE_INDICATOR = "woRule"
 
   static paperFormatList = Object.freeze([
     // Genérico
@@ -182,7 +179,13 @@ export default class Config {
   static Script = `
       :root { --margin: 20mm; }
 
-      html, body { margin: 0; padding: 0; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+      }
+
       body {
         flex: 1 1 auto;
         min-height: 0;
@@ -271,7 +274,6 @@ export default class Config {
         display: inline-block;
         margin: 4px auto;
       }
-
 
       .workspace {
         background: #CCC;

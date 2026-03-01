@@ -1,9 +1,6 @@
 "use strict"
 
-import WdxTemplate from "./WdxTemplate.mjs"
 import SysObject from "./SysObject.mjs"
-import Config from "./Config.mjs"
-
 
 /** @typedef {import("./Typedefs.mjs").wxWordex} wxWordex */
 

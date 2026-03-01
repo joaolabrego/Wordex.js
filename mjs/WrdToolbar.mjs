@@ -1,7 +1,7 @@
 "use strict"
 
 import Config from "./Config.mjs"
-import wxPage from "./WdxDocument.mjs"
+import wxPage from "./WrdDocument.mjs"
 import SysRange from "./SysRange.mjs"
 import wxPicture from "./WdxImage.mjs"
 import WdxSection from "./WdxSection.mjs"
@@ -9,7 +9,7 @@ import ActAlignment from "./ActAlignment.mjs"
 
 /** @typedef {import("./wdxTypes.mjs").wdxItem} wdxItem */
 
-export default class WdxToolbar {
+export default class WrdToolbar {
     #toolbar
     #selectFontStyles
     #selectAlignments

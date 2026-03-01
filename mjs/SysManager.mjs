@@ -1,6 +1,6 @@
 "use strict"
 
-import WdxTemplate from "./WdxTemplate.mjs"
+import WrdTemplate from "./WrdTemplate.mjs"
 import SysObject from "./SysObject.mjs"
 import Config from "./Config.mjs"
 
@@ -9,20 +9,20 @@ import Config from "./Config.mjs"
 
 export default class SysManager {
     #wxObjects = []
-    #WdxTemplate = null
+    #WrdTemplate = null
  
     /**
      * Construtor da classe SysManager.
-     * @param {WdxTemplate} WdxTemplate 
+     * @param {WrdTemplate} WrdTemplate 
      */
-    constructor(WdxTemplate) {
-        this.#WdxTemplate = WdxTemplate
+    constructor(WrdTemplate) {
+        this.#WrdTemplate = WrdTemplate
     }
     /**
-     * @returns {WdxTemplate}
+     * @returns {WrdTemplate}
      */
     get owner() {
-        return this.#WdxTemplate
+        return this.#WrdTemplate
     }
     /**
      * Retorna true ou false se existir ou não o objeto.
@@ -70,7 +70,7 @@ export default class SysManager {
     }
 
     /**
-     * Retorna o índice do objeto wxObject se existir em #wxObjects e em #WdxTemplate, senão retorna -1.
+     * Retorna o índice do objeto wxObject se existir em #wxObjects e em #WrdTemplate, senão retorna -1.
      * @param {wxWordex} wxObject 
      * @returns {number}
      */
@@ -86,7 +86,7 @@ export default class SysManager {
         return !!wxObject.element.dataset[Config.K_FOCUS_INDICATOR]
     }
     /**
-     * Retorna primeiro objeto focado em #wxObjects pertencente ao #WdxTemplate.
+     * Retorna primeiro objeto focado em #wxObjects pertencente ao #WrdTemplate.
      * @returns {SysObject}
      */
     findFocused() {
